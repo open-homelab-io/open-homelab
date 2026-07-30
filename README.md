@@ -99,6 +99,7 @@ The no-AWS path is the default. AWS features are opt-in through environment flag
 - [Configuration guide](docs/configuration.md)
 - [Architecture layers](docs/architecture/layers.md)
 - [Operations guide](docs/operations.md)
+- [Release process](docs/release-process.md)
 - [Local tooling runbook](docs/runbooks/local-tooling.md)
 - [OpenBao runbook](docs/runbooks/openbao.md)
 - [Keycloak runbook](docs/runbooks/keycloak.md)

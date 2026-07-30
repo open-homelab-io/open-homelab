@@ -21,6 +21,7 @@ Keep personal lab values out of commits. Use placeholders such as `example.com`,
 3. Run the relevant validation commands.
 4. Update docs when behavior, configuration, or operations change.
 5. Open a pull request with the deployment mode you tested.
+6. Use a Conventional Commit-style squash message when merging, such as `fix: correct Talos bootstrap docs` or `feat: add workload example`.
 
 ## Validation
 
@@ -62,6 +63,10 @@ Include:
 - whether you tested local/no-AWS, AWS state, AWS DNS, or docs-only
 - any migration steps for existing users
 - any new secrets, permissions, or cloud resources
+
+## Releases
+
+Releases are managed by Release Please from Conventional Commit messages on `main`. See [docs/release-process.md](docs/release-process.md).
 
 ## Secrets
 
