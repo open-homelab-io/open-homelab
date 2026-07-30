@@ -21,7 +21,7 @@ Version impact:
 - `fix:` creates a patch release, such as `v0.1.1`
 - `feat:` creates a minor release, such as `v0.2.0`
 - `feat!:` or `BREAKING CHANGE:` creates a major release
-- `docs:` and `chore:` appear in the changelog but do not force a release by themselves
+- `docs:` and `chore:` do not force a release by themselves
 
 ## Normal Flow
 
