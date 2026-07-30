@@ -1,0 +1,33 @@
+preUpgradeChecker:
+  jobEnabled: false
+
+persistence:
+  createStorageClass: true
+  defaultClass: true
+  defaultClassReplicaCount: 3
+  reclaimPolicy: Retain
+  volumeBindingMode: WaitForFirstConsumer
+
+defaultSettings:
+  defaultDataPath: /var/mnt/longhorn
+  createDefaultDiskLabeledNodes: true
+  defaultReplicaCount: '{"v1":"3","v2":"3"}'
+  storageReservedPercentageForDefaultDisk: "10"
+  upgradeChecker: false
+  allowCollectingLonghornUsageMetrics: false
+
+longhornUI:
+  replicas: 1
+
+annotations:
+  k8s.grafana.com/scrape: "true"
+  k8s.grafana.com/job: longhorn-manager
+  k8s.grafana.com/metrics.path: /metrics
+  k8s.grafana.com/metrics.portName: manager
+
+ingress:
+  enabled: false
+
+metrics:
+  serviceMonitor:
+    enabled: false

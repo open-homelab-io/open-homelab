@@ -1,0 +1,3 @@
+- op: add
+  path: /spec/sources/0/helm/valueFiles/-
+  value: $values/platform/cert-manager/values-route53.yaml

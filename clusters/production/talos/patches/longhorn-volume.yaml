@@ -1,0 +1,12 @@
+---
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: longhorn
+volumeType: disk
+provisioning:
+  diskSelector:
+    match: disk.transport == "virtio" && disk.size >= 150u * GB
+filesystem:
+  type: xfs
+mount:
+  secure: false

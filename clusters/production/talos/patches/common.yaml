@@ -1,0 +1,11 @@
+machine:
+  time:
+    disabled: false
+    servers:
+      - time.cloudflare.com
+      - time.google.com
+  install:
+    wipe: true
+cluster:
+  allowSchedulingOnControlPlanes: false
+

@@ -1,0 +1,22 @@
+frrk8s:
+  enabled: false
+
+prometheus:
+  metricsPort: 9120
+  rbacPrometheus: false
+
+controller:
+  podAnnotations:
+    k8s.grafana.com/scrape: "true"
+    k8s.grafana.com/job: metallb-controller
+    k8s.grafana.com/metrics.path: /metrics
+    k8s.grafana.com/metrics.portNumber: "9120"
+    k8s.grafana.com/metrics.scheme: https
+
+speaker:
+  podAnnotations:
+    k8s.grafana.com/scrape: "true"
+    k8s.grafana.com/job: metallb-speaker
+    k8s.grafana.com/metrics.path: /metrics
+    k8s.grafana.com/metrics.portNumber: "9120"
+    k8s.grafana.com/metrics.scheme: https

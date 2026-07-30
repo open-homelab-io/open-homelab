@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: openbao
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "14"
+spec:
+  project: default
+  sources:
+    - repoURL: https://openbao.github.io/openbao-helm
+      chart: openbao
+      targetRevision: 0.28.6
+      helm:
+        releaseName: openbao
+        valueFiles:
+          - $values/platform/openbao/values.yaml
+    - repoURL: https://github.com/open-homelab-io/open-homelab.git
+      targetRevision: swap-flannel-for-cilium
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: openbao
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+

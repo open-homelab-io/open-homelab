@@ -1,0 +1,52 @@
+deployment:
+  replicas: 1
+
+ingressClass:
+  enabled: true
+  isDefaultClass: true
+  name: traefik
+
+gateway:
+  enabled: false
+
+gatewayClass:
+  enabled: false
+
+providers:
+  kubernetesCRD:
+    enabled: true
+  kubernetesIngress:
+    enabled: true
+    publishedService:
+      enabled: true
+  kubernetesGateway:
+    enabled: false
+
+service:
+  spec:
+    type: LoadBalancer
+    loadBalancerIP: 192.168.5.46
+
+log:
+  level: INFO
+
+accessLog:
+  enabled: false
+
+metrics:
+  addInternals: true
+  prometheus:
+    addEntryPointsLabels: true
+    addRoutersLabels: true
+    addServicesLabels: true
+    service:
+      enabled: true
+      annotations:
+        k8s.grafana.com/scrape: "true"
+        k8s.grafana.com/job: traefik
+        k8s.grafana.com/metrics.path: /metrics
+        k8s.grafana.com/metrics.portName: metrics
+
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false

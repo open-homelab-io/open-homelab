@@ -1,0 +1,93 @@
+cluster:
+  name: homelab
+  dnsDomain: example.com
+  gateway: 192.168.5.1
+  cidrSuffix: 24
+
+proxmox:
+  insecure: true
+  defaultNodeName: proxmox1
+  datastoreId: shared-nfs-storage-pool
+  isoDatastoreId: proxmox-host-nfs
+  isoNodeName: proxmox1
+  networkBridge: vmbr0
+  vlanId: 5
+  talosImageUrl: https://factory.talos.dev/image/613e1592b2da41ae5e265e8789429f22e121aab91cb4deb6bc3c0b6262961245/v1.13.7/metal-amd64.iso
+  talosImageFileName: talos-metal-amd64-longhorn-v1.13.7.iso
+  talosImageFileId: local:iso/talos-metal-amd64.iso
+  longhornDataDisk:
+    enabled: true
+    interface: scsi1
+    sizeGb: 200
+    datastoreByNodeName:
+      proxmox1: zfs-storage-pool
+      proxmox3: local
+  # Optional: set these if the provider cannot resolve Proxmox node hostnames
+  # while creating or uploading VM assets.
+  # ssh:
+  #   agent: true
+  #   username: root
+  #   nodes:
+  #     - name: proxmox1
+  #       address: 192.168.5.10
+  #     - name: proxmox2
+  #       address: 192.168.5.11
+  #     - name: proxmox3
+  #       address: 192.168.5.12
+
+defaults:
+  cpuType: host
+  diskInterface: scsi0
+  diskSizeGb: 80
+  memoryMb: 8192
+  cores: 4
+
+nodes:
+  - name: controller-1
+    role: controlplane
+    nodeName: proxmox1
+    vmId: 555
+    address: 192.168.5.55
+    cores: 4
+    memoryMb: 8192
+    diskSizeGb: 100
+  - name: worker-01
+    role: worker
+    nodeName: proxmox1
+    vmId: 501
+    address: 192.168.5.101
+    cores: 4
+    memoryMb: 16384
+    diskSizeGb: 120
+  - name: worker-02
+    role: worker
+    nodeName: proxmox1
+    vmId: 502
+    address: 192.168.5.102
+    cores: 4
+    memoryMb: 16384
+    diskSizeGb: 120
+  - name: worker-07
+    role: worker
+    nodeName: proxmox3
+    vmId: 507
+    address: 192.168.5.107
+    cores: 4
+    memoryMb: 16384
+    diskSizeGb: 120
+  - name: worker-08
+    role: worker
+    nodeName: proxmox3
+    vmId: 508
+    address: 192.168.5.108
+    cores: 4
+    memoryMb: 16384
+    diskSizeGb: 120
+  - name: worker-09
+    role: worker
+    nodeName: proxmox3
+    vmId: 509
+    address: 192.168.5.109
+    cores: 4
+    memoryMb: 16384
+    diskSizeGb: 120

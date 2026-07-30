@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cilium
+  namespace: argocd
+  annotations:
+    # Cilium is the CNI; reconcile it before every other platform component.
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: default
+  sources:
+    - repoURL: https://helm.cilium.io/
+      chart: cilium
+      targetRevision: 1.19.6
+      helm:
+        releaseName: cilium
+        valueFiles:
+          - $values/platform/cilium/values.yaml
+    - repoURL: https://github.com/open-homelab-io/open-homelab.git
+      targetRevision: swap-flannel-for-cilium
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      # Adopt the Helm release created by scripts/bootstrap-cilium.sh.
+      - ServerSideApply=true

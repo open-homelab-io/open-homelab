@@ -1,0 +1,2656 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "description": "A dashboard that monitors ArgoCD with a focus on the operational side of ArgoCD. The dashboards were generated using [argo-cd-mixin](https://github.com/adinhodovic/argo-cd-mixin). Open issues and create feature requests in the repository.",
+  "editable": false,
+  "links": [
+    {
+      "asDropdown": true,
+      "includeVars": false,
+      "keepTime": true,
+      "tags": [
+        "ci/cd",
+        "argo-cd"
+      ],
+      "targetBlank": true,
+      "title": "ArgoCD",
+      "type": "dashboards"
+    }
+  ],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "title": "Summary",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "mimir"
+      },
+      "description": "The total number of clusters being managed by ArgoCD.",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 1
+      },
+      "id": 2,
+      "options": {
+        "graphMode": "area",
+        "percentChangeColorMode": "standard",
+        "showPercentChange": false
+      },
+      "pluginVersion": "v11.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "expr": "sum(\n  argocd_cluster_info{\n    cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n\n  }\n)\n",
+          "instant": false
+        }
+      ],
+      "title": "Clusters",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "mimir"
+      },
+      "description": "The total number of Git repositories being monitored by ArgoCD.",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 4,
+        "y": 1
+      },
+      "id": 3,
+      "options": {
+        "graphMode": "area",
+        "percentChangeColorMode": "standard",
+        "showPercentChange": false
+      },
+      "pluginVersion": "v11.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "expr": "count(\n  count(\n    argocd_app_info{\n      cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n\n    }\n  )\n  by (repo)\n)\n",
+          "instant": false
+        }
+      ],
+      "title": "Repositories",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "mimir"
+      },
+      "description": "The total number of applications being managed by ArgoCD.",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 1
+      },
+      "id": 4,
+      "options": {
+        "graphMode": "area",
+        "percentChangeColorMode": "standard",
+        "showPercentChange": false
+      },
+      "pluginVersion": "v11.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "expr": "sum(\n  argocd_app_info{\n    cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n,\ndest_server=~\"$kubernetes_cluster\",\nproject=~\"$project\"\n\n  }\n)\n",
+          "instant": false
+        }
+      ],
+      "title": "Applications",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "mimir"
+      },
+      "description": "The distribution of application health statuses managed by ArgoCD.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Synced"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "OutOfSync"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Unknown"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 5
+      },
+      "id": 5,
+      "options": {
+        "displayLabels": [
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "values": [
+            "percent"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "v11.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "expr": "sum(\n  argocd_app_info{\n    cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n,\ndest_server=~\"$kubernetes_cluster\",\nproject=~\"$project\"\n\n  }\n) by (health_status)\n",
+          "instant": true,
+          "legendFormat": "{{ health_status }}"
+        }
+      ],
+      "title": "Health Status",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "mimir"
+      },
+      "description": "The distribution of application sync statuses managed by ArgoCD.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Synced"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "OutOfSync"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Unknown"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 5
+      },
+      "id": 6,
+      "options": {
+        "displayLabels": [
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "values": [
+            "percent"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "v11.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "expr": "sum(\n  argocd_app_info{\n    cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n,\ndest_server=~\"$kubernetes_cluster\",\nproject=~\"$project\"\n\n  }\n) by (sync_status)\n",
+          "instant": true,
+          "legendFormat": "{{ sync_status }}"
+        }
+      ],
+      "title": "Sync Status",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "mimir"
+      },
+      "description": "A table listing all applications managed by ArgoCD, along with their health and sync statuses.",
+      "fieldConfig": {
+        "defaults": {
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "Go To Application",
+              "type": "dashboard",
+              "url": "/d/argo-cd-application-overview-kask/argo-cd-application-overview?&var-project=${__data.fields.Project}&var-application=${__data.fields.Application}"
+            }
+          ],
+          "thresholds": {
+            "steps": []
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 1
+      },
+      "id": 7,
+      "options": {
+        "footer": {
+          "enablePagination": true
+        },
+        "sortBy": [
+          {
+            "desc": false,
+            "displayName": "Application"
+          }
+        ]
+      },
+      "pluginVersion": "v11.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "expr": "sum(\n  argocd_app_info{\n    cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n,\ndest_server=~\"$kubernetes_cluster\",\nproject=~\"$project\"\n\n  }\n) by (job, dest_server, project, name, health_status, sync_status)\n",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "title": "Applications",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Value": true,
+              "dest_server": true,
+              "job": true
+            },
+            "indexByName": {
+              "health_status": 2,
+              "name": 0,
+              "project": 1,
+              "sync_status": 3
+            },
+            "renameByName": {
+              "dest_server": "Kubernetes Cluster",
+              "health_status": "Health Status",
+              "job": "Job",
+              "name": "Application",
+              "project": "Project",
+              "sync_status": "Sync Status"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 11
+      },
+      "id": 8,
+      "title": "Sync Stats",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "mimir"
+      },
+      "description": "A timeseries panel showing sync activity for applications managed by ArgoCD.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "axisSoftMin": 0,
+            "fillOpacity": 100,
+            "lineWidth": 1,
+            "stacking": {
+              "mode": "normal"
+            }
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "id": 9,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "sortBy": "Mean",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "v11.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "exemplar": false,
+          "expr": "sum(\n  round(\n    increase(\n      argocd_app_sync_total{\n        cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n,\ndest_server=~\"$kubernetes_cluster\",\nproject=~\"$project\"\n\n      }[$__rate_interval]\n    )\n  )\n) by (job, dest_server, project, name)\n> 0\n",
+          "legendFormat": "{{ project }}/{{ name }}"
+        }
+      ],
+      "title": "Sync Activity",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "mimir"
+      },
+      "description": "A timeseries panel showing sync failures for applications managed by ArgoCD.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "axisSoftMin": 0,
+            "fillOpacity": 100,
+            "lineWidth": 1,
+            "stacking": {
+              "mode": "normal"
+            }
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 18
+      },
+      "id": 10,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "sortBy": "Mean",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "v11.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "exemplar": false,
+          "expr": "sum(\n  round(\n    increase(\n      argocd_app_sync_total{\n        cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n,\ndest_server=~\"$kubernetes_cluster\",\nproject=~\"$project\"\n,\n        phase=~\"Error|Failed\"\n      }[$__rate_interval]\n    )\n  )\n) by (job, dest_server, project, name, phase)\n> 0\n",
+          "legendFormat": "{{ project }}/{{ name }} - {{ phase }}"
+        }
+      ],
+      "title": "Sync Failures",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "id": 11,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "A timeseries panel showing reconciliation activity for applications managed by ArgoCD.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "axisSoftMin": 0,
+                "fillOpacity": 100,
+                "lineWidth": 1,
+                "stacking": {
+                  "mode": "normal"
+                }
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 25
+          },
+          "id": 12,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Mean",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "exemplar": false,
+              "expr": "sum(\n  round(\n    increase(\n      argocd_app_reconcile_count{\n        cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n\n      }[$__rate_interval]\n    )\n  )\n) by (namespace, job)\n",
+              "legendFormat": "{{ namespace }}/{{ job }}"
+            }
+          ],
+          "title": "Reconciliation Activity",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "A heatmap panel showing reconciliation performance for applications managed by ArgoCD.",
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 31
+          },
+          "id": 13,
+          "options": {
+            "calculate": true,
+            "yAxis": {
+              "unit": "s"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "expr": "sum(\n  rate(\n    argocd_app_reconcile_bucket{\n      cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n\n    }[$__rate_interval]\n  )\n) by (le)\n",
+              "legendFormat": "{{ le }}"
+            }
+          ],
+          "title": "Reconciliation Performance",
+          "type": "heatmap"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "A timeseries panel showing Kubernetes API activity for applications managed by ArgoCD.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "axisSoftMin": 0,
+                "fillOpacity": 100,
+                "lineWidth": 1,
+                "stacking": {
+                  "mode": "normal"
+                }
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 37
+          },
+          "id": 14,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Mean",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "exemplar": false,
+              "expr": "sum(\n  round(\n    increase(\n      argocd_app_k8s_request_total{\n        cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n\n      }[$__rate_interval]\n    )\n  )\n) by (job, verb, resource_kind)\n",
+              "legendFormat": "{{ verb }} {{ resource_kind }}"
+            }
+          ],
+          "title": "K8s API Activity",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "Time to process resource events in batches. Controlled by ARGOCD_CLUSTER_CACHE_BATCH_EVENTS_PROCESSING and related settings.",
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 43
+          },
+          "id": 15,
+          "options": {
+            "calculate": true,
+            "yAxis": {
+              "unit": "s"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "expr": "sum(\n  rate(\n    argocd_resource_events_processing_bucket{\n      cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n\n    }[$__rate_interval]\n  )\n) by (le)\n",
+              "legendFormat": "{{ le }}"
+            }
+          ],
+          "title": "Resource Event Processing Duration",
+          "type": "heatmap"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "Number of resource events processed per batch. Batch processing improves performance when managing large numbers of resources.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "axisSoftMin": 0,
+                "fillOpacity": 100,
+                "lineWidth": 1,
+                "stacking": {
+                  "mode": "normal"
+                }
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 49
+          },
+          "id": 16,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Mean",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "exemplar": false,
+              "expr": "sum(\n  argocd_resource_events_processed_in_batch{\n    cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n\n  }\n) by (namespace, job)\n",
+              "legendFormat": "{{ namespace }}/{{ job }}"
+            }
+          ],
+          "title": "Resource Events Batch Size",
+          "type": "timeseries"
+        }
+      ],
+      "title": "Controller Stats",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 25
+      },
+      "id": 17,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "A timeseries panel showing pending kubectl runs for ArgoCD.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "axisSoftMin": 0,
+                "fillOpacity": 100,
+                "lineWidth": 1,
+                "stacking": {
+                  "mode": "normal"
+                }
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 26
+          },
+          "id": 18,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Mean",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "exemplar": false,
+              "expr": "sum(\n  argocd_kubectl_exec_pending{\n    cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n\n  }\n) by (job, command)\n",
+              "legendFormat": "{{ command }}"
+            }
+          ],
+          "title": "Pending Kubectl Runs",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "Total kubectl executions for manifest generation (Helm, Kustomize, plugins). High counts are expected during sync operations.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "axisSoftMin": 0,
+                "fillOpacity": 100,
+                "lineWidth": 1,
+                "stacking": {
+                  "mode": "normal"
+                }
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 26
+          },
+          "id": 19,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Mean",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "exemplar": false,
+              "expr": "sum(\n  round(\n    increase(\n      argocd_kubectl_exec_total{\n        cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n\n      }[$__rate_interval]\n    )\n  )\n) by (namespace, job, command)\n",
+              "legendFormat": "{{ command }}"
+            }
+          ],
+          "title": "Kubectl Exec Total",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "Rate of kubectl requests by container, method, and code.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "axisSoftMin": 0,
+                "fillOpacity": 100,
+                "lineWidth": 1,
+                "stacking": {
+                  "mode": "normal"
+                }
+              },
+              "unit": "reqps"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 32
+          },
+          "id": 20,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Mean",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "exemplar": false,
+              "expr": "sum(\n  rate(\n    argocd_kubectl_requests_total{\n      cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n\n    }[$__rate_interval]\n  )\n) by (container, method, code)\n",
+              "legendFormat": "{{ container }} {{ method }} {{ code }}"
+            }
+          ],
+          "title": "Kubectl Requests Total",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "Distribution of kubectl requests by host over the last 6 hours.",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 32
+          },
+          "id": 21,
+          "options": {
+            "displayLabels": [
+              "percent"
+            ],
+            "legend": {
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "values": [
+                "percent"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "expr": "topk(20,\n  sum(\n    increase(\n      argocd_kubectl_requests_total{\n        cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n\n      }[6h]\n    )\n  ) by (host)\n)\n",
+              "instant": true,
+              "legendFormat": "{{ host }}"
+            }
+          ],
+          "title": "Kubectl Requests Total by Host (6h)",
+          "type": "piechart"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "P95 kubectl request duration by container and verb. High values indicate slow kubectl operations against the Kubernetes API.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "fillOpacity": 10
+              },
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 38
+          },
+          "id": 22,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Mean",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "exemplar": false,
+              "expr": "histogram_quantile(\n  0.95,\n  sum(\n    rate(\n      argocd_kubectl_request_duration_seconds_bucket{\n        cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n\n      }[$__rate_interval]\n    )\n  ) by (le, container, verb)\n)\n",
+              "legendFormat": "{{ container }} {{ verb }}"
+            }
+          ],
+          "title": "Kubectl Request Duration by Verb (P95)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "Distribution of kubectl request duration by host over the last 24 hours.",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 38
+          },
+          "id": 23,
+          "options": {
+            "displayLabels": [
+              "percent"
+            ],
+            "legend": {
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "values": [
+                "percent"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "expr": "topk(20,\n  histogram_quantile(\n    0.95,\n    sum(\n      increase(\n        argocd_kubectl_request_duration_seconds_bucket{\n          cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n\n        }[6h]\n      )\n    ) by (le, host)\n  )\n)\n",
+              "instant": true,
+              "legendFormat": "{{ host }}"
+            }
+          ],
+          "title": "Kubectl Request Duration by Host (6h)",
+          "type": "piechart"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "Rate of kubectl request retries by container, method, and code. Elevated retry rates indicate transient Kubernetes API errors or throttling.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "axisSoftMin": 0,
+                "fillOpacity": 100,
+                "lineWidth": 1,
+                "stacking": {
+                  "mode": "normal"
+                }
+              },
+              "unit": "reqps"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 44
+          },
+          "id": 24,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Mean",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "exemplar": false,
+              "expr": "sum(\n  rate(\n    argocd_kubectl_request_retries_total{\n      cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n\n    }[$__rate_interval]\n  )\n) by (container, method, code)\n",
+              "legendFormat": "{{ container }} {{ method }} {{ code }}"
+            }
+          ],
+          "title": "Kubectl Request Retries",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "Distribution of kubectl request retries by host over the last 24 hours.",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 44
+          },
+          "id": 25,
+          "options": {
+            "displayLabels": [
+              "percent"
+            ],
+            "legend": {
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "values": [
+                "percent"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "expr": "topk(20,\n  sum(\n    increase(\n      argocd_kubectl_request_retries_total{\n        cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n\n      }[6h]\n    )\n  ) by (host)\n)\n",
+              "instant": true,
+              "legendFormat": "{{ host }}"
+            }
+          ],
+          "title": "Kubectl Request Retries by Host (6h)",
+          "type": "piechart"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "P95 time spent waiting in the kubectl client-side rate limiter per host. High values indicate the Kubernetes API server is throttling ArgoCD requests.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "fillOpacity": 0
+              },
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 50
+          },
+          "id": 26,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Mean",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "exemplar": false,
+              "expr": "histogram_quantile(\n  0.95,\n  sum(\n    rate(\n      argocd_kubectl_rate_limiter_duration_seconds_bucket{\n        cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n\n      }[$__rate_interval]\n    )\n  ) by (le, verb)\n)\n",
+              "legendFormat": "{{ verb }}"
+            }
+          ],
+          "title": "Kubectl Rate Limiter Duration (P95)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "Distribution of P95 kubectl rate limiter duration by host over the last 6 hours.",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 50
+          },
+          "id": 27,
+          "options": {
+            "displayLabels": [
+              "percent"
+            ],
+            "legend": {
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "values": [
+                "percent"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "expr": "topk(20,\n  histogram_quantile(\n    0.95,\n    sum(\n      increase(\n        argocd_kubectl_rate_limiter_duration_seconds_bucket{\n          cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n\n        }[6h]\n      )\n    ) by (le, host)\n  )\n)\n",
+              "instant": true,
+              "legendFormat": "{{ host }}"
+            }
+          ],
+          "title": "Kubectl Rate Limiter Duration P95 by Host (6h)",
+          "type": "piechart"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "Distribution of kubectl request payload sizes. Large request sizes may impact API server performance.",
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 56
+          },
+          "id": 28,
+          "options": {
+            "calculate": true,
+            "yAxis": {
+              "unit": "bytes"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "expr": "sum(\n  rate(\n    argocd_kubectl_request_size_bytes_bucket{\n      cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n\n    }[$__rate_interval]\n  )\n) by (le)\n",
+              "legendFormat": "{{ le }}"
+            }
+          ],
+          "title": "Kubectl Request Size",
+          "type": "heatmap"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "Distribution of kubectl response payload sizes. Large response sizes may indicate wide resource fetches and can impact controller memory usage.",
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 56
+          },
+          "id": 29,
+          "options": {
+            "calculate": true,
+            "yAxis": {
+              "unit": "bytes"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "expr": "sum(\n  rate(\n    argocd_kubectl_response_size_bytes_bucket{\n      cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n\n    }[$__rate_interval]\n  )\n) by (le)\n",
+              "legendFormat": "{{ le }}"
+            }
+          ],
+          "title": "Kubectl Response Size",
+          "type": "heatmap"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "Total kubectl exec plugin calls by call status and exit code. Failed call statuses or non-zero codes indicate credential plugin authentication issues.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "axisSoftMin": 0,
+                "fillOpacity": 100,
+                "lineWidth": 1,
+                "stacking": {
+                  "mode": "normal"
+                }
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 62
+          },
+          "id": 30,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Mean",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "exemplar": false,
+              "expr": "sum(\n  round(\n    increase(\n      argocd_kubectl_exec_plugin_call_total{\n        cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n\n      }[$__rate_interval]\n    )\n  )\n) by (call_status, code)\n",
+              "legendFormat": "{{ call_status }} {{ code }}"
+            }
+          ],
+          "title": "Kubectl Exec Plugin Calls",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "Total number of kubectl transport create calls. High values may indicate frequent transport recreation due to credential rotation or connection churn.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "axisSoftMin": 0,
+                "fillOpacity": 100,
+                "lineWidth": 1,
+                "stacking": {
+                  "mode": "normal"
+                }
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 62
+          },
+          "id": 31,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Mean",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "exemplar": false,
+              "expr": "sum(\n  round(\n    increase(\n      argocd_kubectl_transport_create_calls_total{\n        cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n\n      }[$__rate_interval]\n    )\n  )\n) by (namespace, job)\n",
+              "legendFormat": "{{ namespace }}/{{ job }}"
+            }
+          ],
+          "title": "Kubectl Transport Create Calls",
+          "type": "timeseries"
+        }
+      ],
+      "title": "Kubectl Stats",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 26
+      },
+      "id": 32,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "Total number of gRPC RPCs completed on the API server by service, method, and response code.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "axisSoftMin": 0,
+                "fillOpacity": 100,
+                "lineWidth": 1,
+                "stacking": {
+                  "mode": "normal"
+                }
+              },
+              "unit": "reqps"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 27
+          },
+          "id": 33,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Mean",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "exemplar": false,
+              "expr": "sum(\n  rate(\n    grpc_server_handled_total{\n      cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n\n    }[$__rate_interval]\n  )\n) by (namespace, job, grpc_service, grpc_method, grpc_code)\n> 0\n",
+              "legendFormat": "{{ grpc_service }}/{{ grpc_method }} - {{ grpc_code }}"
+            }
+          ],
+          "title": "gRPC Requests Handled",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "Total number of gRPC stream messages sent by the API server.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "axisSoftMin": 0,
+                "fillOpacity": 100,
+                "lineWidth": 1,
+                "stacking": {
+                  "mode": "normal"
+                }
+              },
+              "unit": "reqps"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 27
+          },
+          "id": 34,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Mean",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "exemplar": false,
+              "expr": "sum(\n  rate(\n    grpc_server_msg_sent_total{\n      cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n\n    }[$__rate_interval]\n  )\n) by (namespace, job, grpc_service, grpc_method)\n> 0\n",
+              "legendFormat": "{{ grpc_service }}/{{ grpc_method }}"
+            }
+          ],
+          "title": "gRPC Messages Sent",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "P50 server-side gRPC handling duration by service and method.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "fillOpacity": 0
+              },
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 33
+          },
+          "id": 35,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Mean",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "exemplar": false,
+              "expr": "histogram_quantile(\n  0.5,\n  sum(\n    rate(\n      grpc_server_handling_seconds_bucket{\n        cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n\n      }[$__rate_interval]\n    )\n  ) by (le, grpc_service, grpc_method)\n)\nand\nsum(\n  rate(\n    grpc_server_handling_seconds_count{\n      cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n\n    }[$__rate_interval]\n  )\n) by (grpc_service, grpc_method) > 0\n",
+              "legendFormat": "{{ grpc_service }}/{{ grpc_method }}"
+            }
+          ],
+          "title": "gRPC Server Handling Duration (P50)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "P95 server-side gRPC handling duration by service and method.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "fillOpacity": 0
+              },
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 33
+          },
+          "id": 36,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Mean",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "exemplar": false,
+              "expr": "histogram_quantile(\n  0.95,\n  sum(\n    rate(\n      grpc_server_handling_seconds_bucket{\n        cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n\n      }[$__rate_interval]\n    )\n  ) by (le, grpc_service, grpc_method)\n)\nand\nsum(\n  rate(\n    grpc_server_handling_seconds_count{\n      cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n\n    }[$__rate_interval]\n  )\n) by (grpc_service, grpc_method) > 0\n",
+              "legendFormat": "{{ grpc_service }}/{{ grpc_method }}"
+            }
+          ],
+          "title": "gRPC Server Handling Duration (P95)",
+          "type": "timeseries"
+        }
+      ],
+      "title": "gRPC Stats",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 27
+      },
+      "id": 37,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "A timeseries panel showing the connection status of each cluster managed by ArgoCD. Failed connections indicate cluster connectivity or authentication issues.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "axisSoftMax": 1,
+                "axisSoftMin": 0,
+                "fillOpacity": 0
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 28
+          },
+          "id": 38,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Mean",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "exemplar": false,
+              "expr": "sum(\n  argocd_cluster_connection_status{\n    cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n,\n    server=~\"$kubernetes_cluster\"\n  }\n) by (namespace, job, server, k8s_version)\n",
+              "legendFormat": "{{ server }} - {{ k8s_version }}"
+            }
+          ],
+          "title": "Cluster Connection Status",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "Age of the cluster cache in seconds. Stale caches (high values) can cause reconciliation delays and performance issues.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "fillOpacity": 0
+              },
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 34
+          },
+          "id": 39,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Mean",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "exemplar": false,
+              "expr": "argocd_cluster_cache_age_seconds{\n  cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n,\n  server=~\"$kubernetes_cluster\"\n}\n",
+              "legendFormat": "{{ server }}"
+            }
+          ],
+          "title": "Cluster Cache Age",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "A timeseries panel showing the number of resource objects in each cluster managed by ArgoCD.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "axisSoftMin": 0,
+                "fillOpacity": 100,
+                "lineWidth": 1,
+                "stacking": {
+                  "mode": "normal"
+                }
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 40
+          },
+          "id": 40,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Mean",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "exemplar": false,
+              "expr": "sum(\n  argocd_cluster_api_resource_objects{\n    cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n,\n    server=~\"$kubernetes_cluster\"\n  }\n) by (namespace, job, server)\n",
+              "legendFormat": "{{ server }}"
+            }
+          ],
+          "title": "Resource Objects",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "A timeseries panel showing the number of API resources in each cluster managed by ArgoCD.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "axisSoftMin": 0,
+                "fillOpacity": 100,
+                "lineWidth": 1,
+                "stacking": {
+                  "mode": "normal"
+                }
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 46
+          },
+          "id": 41,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Mean",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "exemplar": false,
+              "expr": "sum(\n  argocd_cluster_api_resources{\n    cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n,\n    server=~\"$kubernetes_cluster\"\n  }\n) by (namespace, job, server)\n",
+              "legendFormat": "{{ server }}"
+            }
+          ],
+          "title": "API Resources",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "A timeseries panel showing cluster events for clusters managed by ArgoCD.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "axisSoftMin": 0,
+                "fillOpacity": 100,
+                "lineWidth": 1,
+                "stacking": {
+                  "mode": "normal"
+                }
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 52
+          },
+          "id": 42,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Mean",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "exemplar": false,
+              "expr": "sum(\n  increase(\n    argocd_cluster_events_total{\n      cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n,\n      server=~\"$kubernetes_cluster\"\n    }[$__rate_interval]\n  )\n) by (namespace, job, server)\n",
+              "legendFormat": "{{ server }}"
+            }
+          ],
+          "title": "Cluster Events",
+          "type": "timeseries"
+        }
+      ],
+      "title": "Cluster Stats",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 28
+      },
+      "id": 43,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "A timeseries panel showing pending requests in the ArgoCD repo server queue. High values may indicate the repo server needs scaling.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "axisSoftMin": 0,
+                "fillOpacity": 100,
+                "lineWidth": 1,
+                "stacking": {
+                  "mode": "normal"
+                }
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 29
+          },
+          "id": 44,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Mean",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "exemplar": false,
+              "expr": "sum(\n  argocd_repo_pending_request_total{\n    cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n\n  }\n) by (namespace, job)\n",
+              "legendFormat": "{{ namespace }}/{{ job }}"
+            }
+          ],
+          "title": "Pending Repo Requests",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "A timeseries panel showing git fetch failures for repositories monitored by ArgoCD. High values may indicate git repository connectivity or authentication issues.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "axisSoftMin": 0,
+                "fillOpacity": 100,
+                "lineWidth": 1,
+                "stacking": {
+                  "mode": "normal"
+                }
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 29
+          },
+          "id": 45,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Mean",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "exemplar": false,
+              "expr": "sum(\n  increase(\n    argocd_git_fetch_fail_total{\n      cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n\n    }[$__rate_interval]\n  )\n) by (namespace, job, repo)\n",
+              "legendFormat": "{{ namespace }} - {{ repo }}"
+            }
+          ],
+          "title": "Git Fetch Failures",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "A timeseries panel showing git ls-remote requests made by ArgoCD.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "axisSoftMin": 0,
+                "fillOpacity": 100,
+                "lineWidth": 1,
+                "stacking": {
+                  "mode": "normal"
+                }
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 35
+          },
+          "id": 46,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Mean",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "exemplar": false,
+              "expr": "sum(\n  increase(\n    argocd_git_request_total{\n      cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n,\n      request_type=\"ls-remote\"\n    }[$__rate_interval]\n  )\n) by (namespace, job, repo)\n",
+              "legendFormat": "{{ namespace }} - {{ repo }}"
+            }
+          ],
+          "title": "Git Requests (ls-remote)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "A timeseries panel showing git checkout requests made by ArgoCD.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "axisSoftMin": 0,
+                "fillOpacity": 100,
+                "lineWidth": 1,
+                "stacking": {
+                  "mode": "normal"
+                }
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 35
+          },
+          "id": 47,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Mean",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "exemplar": false,
+              "expr": "sum(\n  increase(\n    argocd_git_request_total{\n      cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n,\n      request_type=\"fetch\"\n    }[$__rate_interval]\n  )\n) by (namespace, job, repo)\n",
+              "legendFormat": "{{ namespace }} - {{ repo }}"
+            }
+          ],
+          "title": "Git Requests (checkout)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "A heatmap panel showing git fetch performance for ArgoCD.",
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 41
+          },
+          "id": 48,
+          "options": {
+            "calculate": true,
+            "yAxis": {
+              "unit": "s"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "expr": "sum(\n  rate(\n    argocd_git_request_duration_seconds_bucket{\n      cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n,\n      request_type=\"fetch\"\n    }[$__rate_interval]\n  )\n) by (le)\n",
+              "legendFormat": "{{ le }}"
+            }
+          ],
+          "title": "Git Fetch Performance",
+          "type": "heatmap"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "A heatmap panel showing git ls-remote performance for ArgoCD.",
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 41
+          },
+          "id": 49,
+          "options": {
+            "calculate": true,
+            "yAxis": {
+              "unit": "s"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "expr": "sum(\n  rate(\n    argocd_git_request_duration_seconds_bucket{\n      cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n,\n      request_type=\"ls-remote\"\n    }[$__rate_interval]\n  )\n) by (le)\n",
+              "legendFormat": "{{ le }}"
+            }
+          ],
+          "title": "Git Ls-remote Performance",
+          "type": "heatmap"
+        }
+      ],
+      "title": "Repo Server Stats",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 29
+      },
+      "id": 50,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "Rate of Redis requests by ArgoCD component. High rates may indicate Redis becoming a bottleneck at scale.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "axisSoftMin": 0,
+                "fillOpacity": 100,
+                "lineWidth": 1,
+                "stacking": {
+                  "mode": "normal"
+                }
+              },
+              "unit": "reqps"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 30
+          },
+          "id": 51,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true,
+              "sortBy": "Mean",
+              "sortDesc": true
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "exemplar": false,
+              "expr": "sum(\n  rate(\n    argocd_redis_request_total{\n      cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n\n    }[$__rate_interval]\n  )\n) by (namespace, job, initiator)\n",
+              "legendFormat": "{{ initiator }}"
+            }
+          ],
+          "title": "Redis Request Rate",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "mimir"
+          },
+          "description": "Redis request latency distribution. High latencies indicate Redis performance issues that can affect controller scalability.",
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 36
+          },
+          "id": 52,
+          "options": {
+            "calculate": true,
+            "yAxis": {
+              "unit": "s"
+            }
+          },
+          "pluginVersion": "v11.4.0",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "mimir"
+              },
+              "expr": "sum(\n  rate(\n    argocd_redis_request_duration_seconds_bucket{\n      cluster=\"$cluster\",\nnamespace=~\"$namespace\",\njob=~\"$job\"\n\n\n    }[$__rate_interval]\n  )\n) by (le)\n",
+              "legendFormat": "{{ le }}"
+            }
+          ],
+          "title": "Redis Request Duration",
+          "type": "heatmap"
+        }
+      ],
+      "title": "Redis Performance",
+      "type": "row"
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": [
+    "ci/cd",
+    "argo-cd",
+    "grafana-com-import",
+    "gnet-argocd-operational-overview"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "mimir",
+          "value": "mimir"
+        },
+        "label": "Data source",
+        "name": "datasource",
+        "query": "prometheus",
+        "type": "datasource",
+        "hide": 2,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir"
+        }
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir"
+        },
+        "hide": 2,
+        "label": "Cluster",
+        "name": "cluster",
+        "query": "label_values(argocd_app_info{}, cluster)",
+        "refresh": 2,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir"
+        },
+        "includeAll": false,
+        "label": "Namespace",
+        "multi": false,
+        "name": "namespace",
+        "query": "label_values(argocd_app_info{cluster=\"$cluster\"}, namespace)",
+        "refresh": 2,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir"
+        },
+        "includeAll": true,
+        "label": "Job",
+        "multi": true,
+        "name": "job",
+        "query": "label_values(job)",
+        "refresh": 2,
+        "regex": "argo.*",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir"
+        },
+        "includeAll": true,
+        "label": "Kubernetes Cluster",
+        "multi": true,
+        "name": "kubernetes_cluster",
+        "query": "label_values(argocd_app_info{cluster=\"$cluster\", namespace=~\"$namespace\", job=~\"$job\"}, dest_server)",
+        "refresh": 2,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "mimir"
+        },
+        "includeAll": true,
+        "label": "Project",
+        "multi": true,
+        "name": "project",
+        "query": "label_values(argocd_app_info{cluster=\"$cluster\", namespace=~\"$namespace\", job=~\"$job\", dest_server=~\"$kubernetes_cluster\"}, project)",
+        "refresh": 2,
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timezone": "utc",
+  "title": "ArgoCD / Operational / Overview",
+  "uid": "argo-cd-operational-overview-kask",
+  "gnetId": 19993,
+  "id": null
+}

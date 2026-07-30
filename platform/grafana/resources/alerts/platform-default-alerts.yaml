@@ -1,0 +1,653 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-alerts-platform-defaults
+  namespace: observability
+  labels:
+    grafana_alert: "true"
+data:
+  platform-default-alerts.yaml: |
+    apiVersion: 1
+    groups:
+      - orgId: 1
+        name: platform-defaults
+        folder: Platform Alerts
+        interval: 1m
+        rules:
+          - uid: platform-longhorn-volume-degraded
+            title: Longhorn volume degraded
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: mimir
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: mimir
+                  editorMode: code
+                  expr: count(longhorn_volume_robustness{state="degraded"} == 1) OR on() vector(0)
+                  instant: true
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  range: false
+                  refId: A
+              - refId: C
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator:
+                        params:
+                          - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                          - A
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: __expr__
+                  expression: A
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: classic_conditions
+            noDataState: OK
+            execErrState: Error
+            for: 5m
+            annotations:
+              summary: One or more Longhorn volumes are degraded.
+            labels:
+              severity: warning
+              area: storage
+            isPaused: false
+
+          - uid: platform-longhorn-volume-faulted
+            title: Longhorn volume faulted
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: mimir
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: mimir
+                  editorMode: code
+                  expr: count(longhorn_volume_robustness{state="faulted"} == 1) OR on() vector(0)
+                  instant: true
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  range: false
+                  refId: A
+              - refId: C
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator:
+                        params:
+                          - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                          - A
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: __expr__
+                  expression: A
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: classic_conditions
+            noDataState: OK
+            execErrState: Error
+            for: 1m
+            annotations:
+              summary: One or more Longhorn volumes are faulted.
+            labels:
+              severity: critical
+              area: storage
+            isPaused: false
+
+          - uid: platform-cert-expiring
+            title: Certificate expiring within seven days
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: mimir
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: mimir
+                  editorMode: code
+                  expr: min(certmanager_certificate_expiration_timestamp_seconds - time()) OR on() vector(31536000)
+                  instant: true
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  range: false
+                  refId: A
+              - refId: C
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator:
+                        params:
+                          - 604800
+                        type: lt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                          - A
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: __expr__
+                  expression: A
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: classic_conditions
+            noDataState: OK
+            execErrState: Error
+            for: 15m
+            annotations:
+              summary: A cert-manager certificate expires within seven days.
+            labels:
+              severity: warning
+              area: certificates
+            isPaused: false
+
+          - uid: platform-cert-not-ready
+            title: Certificate not ready
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: mimir
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: mimir
+                  editorMode: code
+                  expr: sum(certmanager_certificate_ready_status{condition!="True"} == 1) OR on() vector(0)
+                  instant: true
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  range: false
+                  refId: A
+              - refId: C
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator:
+                        params:
+                          - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                          - A
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: __expr__
+                  expression: A
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: classic_conditions
+            noDataState: OK
+            execErrState: Error
+            for: 10m
+            annotations:
+              summary: One or more cert-manager certificates are not ready.
+            labels:
+              severity: warning
+              area: certificates
+            isPaused: false
+
+          - uid: platform-argocd-application-unhealthy
+            title: Argo CD application unhealthy
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: mimir
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: mimir
+                  editorMode: code
+                  expr: count(argocd_app_info{health_status!="Healthy"}) OR on() vector(0)
+                  instant: true
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  range: false
+                  refId: A
+              - refId: C
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator:
+                        params:
+                          - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                          - A
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: __expr__
+                  expression: A
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: classic_conditions
+            noDataState: OK
+            execErrState: Error
+            for: 10m
+            annotations:
+              summary: One or more Argo CD applications are unhealthy.
+            labels:
+              severity: warning
+              area: gitops
+            isPaused: false
+
+          - uid: platform-argocd-application-out-of-sync
+            title: Argo CD application out of sync
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: mimir
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: mimir
+                  editorMode: code
+                  expr: count(argocd_app_info{sync_status!="Synced"}) OR on() vector(0)
+                  instant: true
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  range: false
+                  refId: A
+              - refId: C
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator:
+                        params:
+                          - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                          - A
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: __expr__
+                  expression: A
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: classic_conditions
+            noDataState: OK
+            execErrState: Error
+            for: 10m
+            annotations:
+              summary: One or more Argo CD applications are out of sync.
+            labels:
+              severity: warning
+              area: gitops
+            isPaused: false
+
+          - uid: platform-keycloak-unavailable
+            title: Keycloak unavailable
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: mimir
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: mimir
+                  editorMode: code
+                  expr: (count(up{job=~"keycloak.*"} == 1) OR on() vector(0)) < bool 1
+                  instant: true
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  range: false
+                  refId: A
+              - refId: C
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator:
+                        params:
+                          - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                          - A
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: __expr__
+                  expression: A
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: classic_conditions
+            noDataState: Alerting
+            execErrState: Error
+            for: 5m
+            annotations:
+              summary: Keycloak metrics are unavailable.
+            labels:
+              severity: critical
+              area: identity
+            isPaused: false
+
+          - uid: platform-openbao-unavailable
+            title: OpenBao unavailable
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: mimir
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: mimir
+                  editorMode: code
+                  expr: (kube_statefulset_replicas{namespace="openbao",statefulset="openbao"} - kube_statefulset_status_replicas_ready{namespace="openbao",statefulset="openbao"}) OR on() vector(1)
+                  instant: true
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  range: false
+                  refId: A
+              - refId: C
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator:
+                        params:
+                          - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                          - A
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: __expr__
+                  expression: A
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: classic_conditions
+            noDataState: Alerting
+            execErrState: Error
+            for: 5m
+            annotations:
+              summary: OpenBao has fewer ready replicas than desired.
+            labels:
+              severity: critical
+              area: secrets
+            isPaused: false
+
+          - uid: platform-node-memory-pressure
+            title: Node memory pressure
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: mimir
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: mimir
+                  editorMode: code
+                  expr: 100 * (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes))
+                  instant: true
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  range: false
+                  refId: A
+              - refId: C
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator:
+                        params:
+                          - 90
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                          - A
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: __expr__
+                  expression: A
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: classic_conditions
+            noDataState: OK
+            execErrState: Error
+            for: 10m
+            annotations:
+              summary: A node is above 90 percent memory usage.
+            labels:
+              severity: warning
+              area: nodes
+            isPaused: false
+
+          - uid: platform-node-disk-pressure
+            title: Node disk pressure
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: mimir
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: mimir
+                  editorMode: code
+                  expr: 100 * (1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|squashfs|ramfs",mountpoint!~"/run.*|/var/lib/kubelet/pods.*"} / node_filesystem_size_bytes{fstype!~"tmpfs|overlay|squashfs|ramfs",mountpoint!~"/run.*|/var/lib/kubelet/pods.*"}))
+                  instant: true
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  range: false
+                  refId: A
+              - refId: C
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator:
+                        params:
+                          - 85
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                          - A
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: __expr__
+                  expression: A
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: classic_conditions
+            noDataState: OK
+            execErrState: Error
+            for: 10m
+            annotations:
+              summary: A node filesystem is above 85 percent usage.
+            labels:
+              severity: warning
+              area: nodes
+            isPaused: false
+
+          - uid: platform-traefik-5xx-spike
+            title: Traefik 5xx responses
+            condition: C
+            data:
+              - refId: A
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: mimir
+                model:
+                  datasource:
+                    type: prometheus
+                    uid: mimir
+                  editorMode: code
+                  expr: sum(increase(traefik_service_requests_total{code=~"5..",protocol="http"}[5m])) OR on() vector(0)
+                  instant: true
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  range: false
+                  refId: A
+              - refId: C
+                relativeTimeRange:
+                  from: 600
+                  to: 0
+                datasourceUid: __expr__
+                model:
+                  conditions:
+                    - evaluator:
+                        params:
+                          - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                          - A
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                  datasource:
+                    type: __expr__
+                    uid: __expr__
+                  expression: A
+                  intervalMs: 1000
+                  maxDataPoints: 43200
+                  refId: C
+                  type: classic_conditions
+            noDataState: OK
+            execErrState: Error
+            for: 5m
+            annotations:
+              summary: Traefik is serving HTTP 5xx responses.
+            labels:
+              severity: warning
+              area: ingress
+            isPaused: false

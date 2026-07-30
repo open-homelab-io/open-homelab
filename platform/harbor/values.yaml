@@ -1,0 +1,112 @@
+expose:
+  type: ingress
+  tls:
+    enabled: true
+    certSource: secret
+    secret:
+      secretName: harbor-tls
+  ingress:
+    className: traefik
+    hosts:
+      core: harbor.lab.example.com
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+
+externalURL: https://harbor.lab.example.com
+
+existingSecretAdminPassword: harbor-secrets
+existingSecretAdminPasswordKey: HARBOR_ADMIN_PASSWORD
+existingSecretSecretKey: harbor-secrets
+
+updateStrategy:
+  type: Recreate
+
+ipFamily:
+  ipv6:
+    enabled: false
+  ipv4:
+    enabled: true
+
+persistence:
+  enabled: true
+  resourcePolicy: keep
+  persistentVolumeClaim:
+    registry:
+      storageClass: longhorn
+      accessMode: ReadWriteOnce
+      size: 50Gi
+    jobservice:
+      jobLog:
+        storageClass: longhorn
+        accessMode: ReadWriteOnce
+        size: 5Gi
+    redis:
+      storageClass: longhorn
+      accessMode: ReadWriteOnce
+      size: 5Gi
+    trivy:
+      storageClass: longhorn
+      accessMode: ReadWriteOnce
+      size: 10Gi
+  imageChartStorage:
+    type: filesystem
+    filesystem:
+      rootdirectory: /storage
+
+database:
+  type: external
+  external:
+    host: harbor-postgres-rw.harbor.svc.cluster.local
+    port: "5432"
+    username: harbor
+    coreDatabase: registry
+    existingSecret: harbor-secrets
+    sslmode: disable
+
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: false
+
+core:
+  existingSecret: harbor-secrets
+  existingXsrfSecret: harbor-secrets
+  extraEnvVars:
+    - name: CONFIG_OVERWRITE_JSON
+      valueFrom:
+        secretKeyRef:
+          name: harbor-secrets
+          key: CONFIG_OVERWRITE_JSON
+  podAnnotations:
+    k8s.grafana.com/scrape: "true"
+    k8s.grafana.com/job: harbor-core
+    k8s.grafana.com/metrics.path: /metrics
+    k8s.grafana.com/metrics.portNumber: "8001"
+  serviceAnnotations:
+    k8s.grafana.com/scrape: "true"
+    k8s.grafana.com/job: harbor-core
+    k8s.grafana.com/metrics.path: /metrics
+    k8s.grafana.com/metrics.portName: metrics
+
+jobservice:
+  existingSecret: harbor-secrets
+  podAnnotations:
+    k8s.grafana.com/scrape: "true"
+    k8s.grafana.com/job: harbor-jobservice
+    k8s.grafana.com/metrics.path: /metrics
+    k8s.grafana.com/metrics.portNumber: "8001"
+
+registry:
+  existingSecret: harbor-secrets
+  podAnnotations:
+    k8s.grafana.com/scrape: "true"
+    k8s.grafana.com/job: harbor-registry
+    k8s.grafana.com/metrics.path: /metrics
+    k8s.grafana.com/metrics.portNumber: "8001"
+
+exporter:
+  podAnnotations:
+    k8s.grafana.com/scrape: "true"
+    k8s.grafana.com/job: harbor-exporter
+    k8s.grafana.com/metrics.path: /metrics
+    k8s.grafana.com/metrics.portNumber: "8001"

@@ -1,0 +1,93 @@
+# Cilium values for the Talos-based production cluster.
+#
+# Talos ships without a CNI (cluster.network.cni.name=none) and with
+# kube-proxy disabled (cluster.proxy.disabled=true), so Cilium provides
+# both pod networking and the kube-proxy replacement.
+#
+# References:
+#   https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/
+#   https://www.talos.dev/latest/kubernetes-guides/network/deploying-cilium/
+
+# --- kube-proxy replacement -------------------------------------------------
+kubeProxyReplacement: true
+# Talos exposes a load-balanced, always-local API server endpoint (KubePrism)
+# on 127.0.0.1:7445. Pointing Cilium at it avoids a chicken-and-egg dependency
+# on an in-cluster kube-proxy VIP that no longer exists.
+k8sServiceHost: localhost
+k8sServicePort: 7445
+
+# --- IPAM -------------------------------------------------------------------
+# Match the Talos default pod subnet so pod CIDRs stay stable across a rebuild.
+ipam:
+  mode: cluster-pool
+  operator:
+    clusterPoolIPv4PodCIDRList:
+      - 10.244.0.0/16
+    clusterPoolIPv4MaskSize: 24
+
+# --- Routing / masquerade ---------------------------------------------------
+# Native routing is not assumed; default tunnel (VXLAN) keeps things simple on
+# the flat 192.168.5.0/24 L2 network shared with MetalLB.
+routingMode: tunnel
+tunnelProtocol: vxlan
+# eBPF masquerading for pod egress; kept off host-legacy iptables.
+bpf:
+  masquerade: true
+
+# --- Talos platform requirements -------------------------------------------
+# Talos manages cgroups itself; Cilium must not try to mount cgroupv2.
+cgroup:
+  autoMount:
+    enabled: false
+  hostRoot: /sys/fs/cgroup
+
+securityContext:
+  capabilities:
+    ciliumAgent:
+      - CHOWN
+      - KILL
+      - NET_ADMIN
+      - NET_RAW
+      - IPC_LOCK
+      - SYS_ADMIN
+      - SYS_RESOURCE
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+    cleanCiliumState:
+      - NET_ADMIN
+      - SYS_ADMIN
+      - SYS_RESOURCE
+
+# --- MetalLB coexistence ----------------------------------------------------
+# LoadBalancer IP allocation and L2 announcement stay with MetalLB, so Cilium's
+# own LB-IPAM and L2 announcements are left disabled (chart defaults).
+l2announcements:
+  enabled: false
+
+# --- Observability ----------------------------------------------------------
+operator:
+  replicas: 1
+  prometheus:
+    enabled: true
+
+prometheus:
+  enabled: true
+
+hubble:
+  enabled: true
+  relay:
+    enabled: true
+  ui:
+    enabled: true
+  metrics:
+    enableOpenMetrics: true
+    enabled:
+      - dns
+      - drop
+      - tcp
+      - flow
+      - port-distribution
+      - icmp
+      - httpV2

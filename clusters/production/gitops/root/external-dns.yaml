@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: external-dns
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "25"
+spec:
+  project: default
+  sources:
+    - repoURL: https://kubernetes-sigs.github.io/external-dns/
+      chart: external-dns
+      targetRevision: 1.21.1
+      helm:
+        releaseName: external-dns
+        valueFiles:
+          - $values/platform/external-dns/values.yaml
+    - repoURL: https://github.com/open-homelab-io/open-homelab.git
+      targetRevision: swap-flannel-for-cilium
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: external-dns
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

@@ -1,0 +1,14 @@
+machine:
+  kubelet:
+    extraArgs:
+      rotate-server-certificates: "true"
+    extraMounts:
+      - destination: /var/mnt/longhorn
+        type: bind
+        source: /var/mnt/longhorn
+        options:
+          - bind
+          - rshared
+          - rw
+  nodeLabels:
+    node.longhorn.io/create-default-disk: "true"

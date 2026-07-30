@@ -1,0 +1,136 @@
+global:
+  extraEnvFrom:
+    - secretRef:
+        name: mimir-minio
+
+mimir:
+  structuredConfig:
+    limits:
+      compactor_blocks_retention_period: 30d
+
+alertmanager:
+  replicas: 1
+  zoneAwareReplication:
+    enabled: false
+  persistentVolume:
+    storageClass: longhorn
+    size: 2Gi
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+
+distributor:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+
+ingester:
+  replicas: 1
+  zoneAwareReplication:
+    enabled: false
+  persistentVolume:
+    storageClass: longhorn
+    size: 10Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+
+overrides_exporter:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+
+ruler:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+
+querier:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 256Mi
+
+query_frontend:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+
+query_scheduler:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+
+store_gateway:
+  replicas: 1
+  zoneAwareReplication:
+    enabled: false
+  persistentVolume:
+    storageClass: longhorn
+    size: 10Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+
+compactor:
+  replicas: 1
+  persistentVolume:
+    storageClass: longhorn
+    size: 10Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+gateway:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+minio:
+  existingSecret: mimir-minio
+  rootUser: grafana-mimir
+  rootPassword: ${MINIO_ROOT_PASSWORD}
+  deploymentUpdate:
+    type: Recreate
+  persistence:
+    storageClass: longhorn
+    size: 20Gi
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+
+kafka:
+  persistence:
+    storageClassName: longhorn
+    size: 10Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+
+rollout_operator:
+  enabled: true
+
+metaMonitoring:
+  serviceMonitor:
+    enabled: false
+  grafanaAgent:
+    enabled: false

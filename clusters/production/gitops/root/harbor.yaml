@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: harbor
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "63"
+spec:
+  project: default
+  sources:
+    - repoURL: https://helm.goharbor.io
+      chart: harbor
+      targetRevision: 1.19.1
+      helm:
+        releaseName: harbor
+        valueFiles:
+          - $values/platform/harbor/values.yaml
+    - repoURL: https://github.com/open-homelab-io/open-homelab.git
+      targetRevision: swap-flannel-for-cilium
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: harbor
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - SkipDryRunOnMissingResource=true

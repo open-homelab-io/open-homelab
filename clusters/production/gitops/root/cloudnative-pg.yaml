@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloudnative-pg
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "45"
+spec:
+  project: default
+  sources:
+    - repoURL: https://cloudnative-pg.github.io/charts
+      chart: cloudnative-pg
+      targetRevision: 0.29.0
+      helm:
+        releaseName: cloudnative-pg
+        valueFiles:
+          - $values/platform/cloudnative-pg/values.yaml
+    - repoURL: https://github.com/open-homelab-io/open-homelab.git
+      targetRevision: swap-flannel-for-cilium
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cloudnative-pg
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

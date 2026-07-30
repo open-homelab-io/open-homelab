@@ -1,0 +1,86 @@
+apiVersion: k8s.keycloak.org/v2beta1
+kind: Keycloak
+metadata:
+  name: keycloak
+  namespace: keycloak
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+spec:
+  instances: 2
+  db:
+    vendor: postgres
+    host: keycloak-postgres-rw.keycloak.svc.cluster.local
+    database: keycloak
+    usernameSecret:
+      name: keycloak-db-credentials
+      key: username
+    passwordSecret:
+      name: keycloak-db-credentials
+      key: password
+  bootstrapAdmin:
+    user:
+      secret: keycloak-bootstrap-admin
+  http:
+    httpEnabled: true
+    httpPort: 8080
+    serviceHttpPort: 80
+  hostname:
+    hostname: auth.lab.example.com
+    strict: true
+  proxy:
+    headers: xforwarded
+  additionalOptions:
+    - name: metrics-enabled
+      value: "true"
+    - name: health-enabled
+      value: "true"
+  env:
+    - name: KEYCLOAK_METRICS_SPI_VERSION
+      value: "7.0.0"
+    - name: KEYCLOAK_METRICS_SPI_SHA256
+      value: e7ec72ab1699e57a25b61cb5e3ef1c532ec9858ed6931c1b491d3368f5d007b8
+  unsupported:
+    podTemplate:
+      spec:
+        initContainers:
+          - name: install-keycloak-metrics-spi
+            image: alpine:3.22.1
+            imagePullPolicy: IfNotPresent
+            env:
+              - name: KEYCLOAK_METRICS_SPI_VERSION
+                value: "7.0.0"
+              - name: KEYCLOAK_METRICS_SPI_SHA256
+                value: e7ec72ab1699e57a25b61cb5e3ef1c532ec9858ed6931c1b491d3368f5d007b8
+            command:
+              - /bin/sh
+              - -ec
+            args:
+              - |
+                jar="/providers/keycloak-metrics-spi-${KEYCLOAK_METRICS_SPI_VERSION}.jar"
+                url="https://github.com/aerogear/keycloak-metrics-spi/releases/download/${KEYCLOAK_METRICS_SPI_VERSION}/keycloak-metrics-spi-${KEYCLOAK_METRICS_SPI_VERSION}.jar"
+                wget -O "${jar}" "${url}"
+                echo "${KEYCLOAK_METRICS_SPI_SHA256}  ${jar}" | sha256sum -c -
+                chmod 0644 "${jar}"
+                chown 1000:0 "${jar}"
+            volumeMounts:
+              - name: keycloak-providers
+                mountPath: /providers
+        containers:
+          - name: keycloak
+            volumeMounts:
+              - name: keycloak-providers
+                mountPath: /opt/keycloak/providers
+        volumes:
+          - name: keycloak-providers
+            emptyDir: {}
+  ingress:
+    enabled: true
+    className: traefik
+    tlsSecret: keycloak-tls
+    annotations: {}
+  resources:
+    requests:
+      cpu: 250m
+      memory: 768Mi
+    limits:
+      memory: 1536Mi

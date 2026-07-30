@@ -1,0 +1,108 @@
+replicas: 1
+
+deploymentStrategy:
+  type: Recreate
+
+admin:
+  existingSecret: grafana-keycloak-oidc
+  userKey: admin-user
+  passwordKey: admin-password
+
+envFromSecret: grafana-keycloak-oidc
+
+grafana.ini:
+  server:
+    domain: grafana.lab.example.com
+    root_url: https://grafana.lab.example.com
+  auth:
+    disable_login_form: true
+    oauth_auto_login: true
+  auth.generic_oauth:
+    enabled: true
+    name: Keycloak
+    allow_sign_up: true
+    auto_login: true
+    client_id: grafana
+    client_secret: $__env{GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET}
+    scopes: openid email profile
+    auth_url: https://auth.lab.example.com/realms/master/protocol/openid-connect/auth
+    token_url: https://auth.lab.example.com/realms/master/protocol/openid-connect/token
+    api_url: https://auth.lab.example.com/realms/master/protocol/openid-connect/userinfo
+    login_attribute_path: preferred_username
+    name_attribute_path: name
+    email_attribute_path: email
+    role_attribute_path: contains(realm_access.roles[*], 'admin') && 'GrafanaAdmin' || 'Viewer'
+    allow_assign_grafana_admin: true
+    use_pkce: true
+    tls_skip_verify_insecure: true
+  users:
+    auto_assign_org: true
+    auto_assign_org_role: Viewer
+
+persistence:
+  enabled: true
+  storageClassName: longhorn
+  accessModes:
+    - ReadWriteOnce
+  size: 10Gi
+
+service:
+  type: ClusterIP
+
+ingress:
+  enabled: true
+  ingressClassName: traefik
+  annotations: {}
+  hosts:
+    - grafana.lab.example.com
+  tls:
+    - secretName: grafana-tls
+      hosts:
+        - grafana.lab.example.com
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Mimir
+        uid: mimir
+        type: prometheus
+        access: proxy
+        url: http://mimir-gateway.observability.svc.cluster.local/prometheus
+        isDefault: true
+      - name: Loki
+        uid: loki
+        type: loki
+        access: proxy
+        url: http://loki-gateway.observability.svc.cluster.local
+        jsonData:
+          maxLines: 1000
+      - name: Tempo
+        uid: tempo
+        type: tempo
+        access: proxy
+        url: http://tempo.observability.svc.cluster.local:3100
+        jsonData:
+          lokiSearch:
+            datasourceUid: loki
+          serviceMap:
+            datasourceUid: mimir
+          tracesToLogsV2:
+            datasourceUid: loki
+          tracesToMetrics:
+            datasourceUid: mimir
+
+sidecar:
+  alerts:
+    enabled: true
+    searchNamespace: ALL
+  dashboards:
+    enabled: true
+    searchNamespace: ALL
+  datasources:
+    enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi

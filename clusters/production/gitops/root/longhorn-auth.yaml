@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: longhorn-auth
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "60"
+spec:
+  project: default
+  sources:
+    - repoURL: https://oauth2-proxy.github.io/manifests
+      chart: oauth2-proxy
+      targetRevision: 10.7.0
+      helm:
+        releaseName: longhorn-oauth2-proxy
+        valueFiles:
+          - $values/platform/longhorn-auth/values.yaml
+    - repoURL: https://github.com/open-homelab-io/open-homelab.git
+      targetRevision: swap-flannel-for-cilium
+      ref: values
+    - repoURL: https://github.com/open-homelab-io/open-homelab.git
+      targetRevision: swap-flannel-for-cilium
+      path: platform/longhorn-auth/resources
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: longhorn-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - SkipDryRunOnMissingResource=true

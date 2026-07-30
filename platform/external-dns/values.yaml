@@ -1,0 +1,66 @@
+provider:
+  name: aws
+
+sources:
+  - service
+  - ingress
+
+domainFilters:
+  - lab.example.com
+
+policy: upsert-only
+registry: noop
+
+interval: 1m
+triggerLoopOnEvent: true
+logLevel: info
+logFormat: text
+
+extraArgs:
+  - --aws-zone-type=public
+  - --aws-zone-match-parent
+  - --zone-id-filter=Z00000000000000000000
+
+env:
+  - name: AWS_REGION
+    value: us-east-1
+  - name: AWS_EC2_METADATA_SERVICE_ENDPOINT
+    value: http://127.0.0.1:9911
+  - name: AWS_EC2_METADATA_DISABLED
+    value: "false"
+
+extraContainers:
+  - name: rolesanywhere-credential-helper
+    image: public.ecr.aws/rolesanywhere/credential-helper:latest
+    imagePullPolicy: IfNotPresent
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+    command:
+      - aws_signing_helper
+    args:
+      - serve
+      - --private-key
+      - /etc/rolesanywhere/tls.key
+      - --certificate
+      - /etc/rolesanywhere/tls.crt
+      - --role-arn
+      - $(ROLESANYWHERE_ROLE_ARN)
+      - --profile-arn
+      - $(ROLESANYWHERE_PROFILE_ARN)
+      - --trust-anchor-arn
+      - $(ROLESANYWHERE_TRUST_ANCHOR_ARN)
+    envFrom:
+      - configMapRef:
+          name: rolesanywhere-dns
+    volumeMounts:
+      - name: rolesanywhere-certificate
+        mountPath: /etc/rolesanywhere
+        readOnly: true
+
+extraVolumes:
+  - name: rolesanywhere-certificate
+    secret:
+      secretName: rolesanywhere-certificate

@@ -1,0 +1,42 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - alerts/platform-default-alerts.yaml
+  - external-secret.yaml
+generatorOptions:
+  disableNameSuffixHash: true
+  labels:
+    grafana_dashboard: "true"
+configMapGenerator:
+  - name: grafana-dashboard-argocd-operational-overview
+    namespace: observability
+    files:
+      - dashboards/argocd-operational-overview.json
+  - name: grafana-dashboard-cert-manager
+    namespace: observability
+    files:
+      - dashboards/cert-manager.json
+  - name: grafana-dashboard-k8s-dashboard-en-20250125
+    namespace: observability
+    files:
+      - dashboards/k8s-dashboard-en-20250125.json
+  - name: grafana-dashboard-keycloak-metrics-dashboard
+    namespace: observability
+    files:
+      - dashboards/keycloak-metrics-dashboard.json
+  - name: grafana-dashboard-longhorn-example-v1-1-0
+    namespace: observability
+    files:
+      - dashboards/longhorn-example-v1-1-0.json
+  - name: grafana-dashboard-metallb
+    namespace: observability
+    files:
+      - dashboards/metallb.json
+  - name: grafana-dashboard-node-exporter-full
+    namespace: observability
+    files:
+      - dashboards/node-exporter-full.json
+  - name: grafana-dashboard-traefik-official-kubernetes-dashboard
+    namespace: observability
+    files:
+      - dashboards/traefik-official-kubernetes-dashboard.json

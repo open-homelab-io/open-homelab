@@ -1,0 +1,106 @@
+cluster:
+  name: homelab-production
+
+destinations:
+  mimir:
+    type: prometheus
+    url: http://mimir-gateway.observability.svc.cluster.local/api/v1/push
+  loki:
+    type: loki
+    url: http://loki-gateway.observability.svc.cluster.local/loki/api/v1/push
+  tempo:
+    type: otlp
+    protocol: grpc
+    url: tempo.observability.svc.cluster.local:4317
+    metrics:
+      enabled: false
+    logs:
+      enabled: false
+    traces:
+      enabled: true
+
+clusterMetrics:
+  enabled: true
+  collector: alloy
+  destinations:
+    - mimir
+  cadvisor:
+    metricsTuning:
+      includeMetrics:
+        - container_fs_limit_bytes
+        - container_fs_usage_bytes
+        - container_spec_cpu_quota
+        - container_spec_memory_limit_bytes
+  kube-state-metrics:
+    metricsTuning:
+      includeMetrics:
+        - kube_namespace_created
+        - kube_pod_created
+        - kube_secret_info
+        - kube_service_info
+
+hostMetrics:
+  enabled: true
+  collector: alloy
+  destinations:
+    - mimir
+  linuxHosts:
+    enabled: true
+    metricsTuning:
+      useDefaultAllowList: false
+
+clusterEvents:
+  enabled: true
+  collector: alloy
+  destinations:
+    - loki
+
+podLogsViaLoki:
+  enabled: true
+  collector: alloy
+  destinations:
+    - loki
+
+annotationAutodiscovery:
+  enabled: true
+  collector: alloy
+  destinations:
+    - mimir
+
+applicationObservability:
+  enabled: true
+  collector: alloy
+  destinations:
+    - mimir
+    - loki
+    - tempo
+  receivers:
+    otlp:
+      grpc:
+        enabled: true
+      http:
+        enabled: true
+
+telemetryServices:
+  kube-state-metrics:
+    deploy: true
+  node-exporter:
+    deploy: true
+
+collectors:
+  alloy:
+    presets:
+      - daemonset
+      - clustered
+      - filesystem-log-reader
+      - host-storage
+      - otel-receiver
+      - small
+    extraService:
+      enabled: true
+      name: alloy-receiver
+    alloy:
+      enableReporting: false
+
+alloy-operator:
+  deploy: true

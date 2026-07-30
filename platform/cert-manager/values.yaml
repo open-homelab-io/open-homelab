@@ -1,0 +1,32 @@
+crds:
+  enabled: true
+  keep: true
+
+replicaCount: 1
+
+prometheus:
+  enabled: true
+  servicemonitor:
+    enabled: false
+
+podAnnotations:
+  k8s.grafana.com/scrape: "true"
+  k8s.grafana.com/job: cert-manager
+  k8s.grafana.com/metrics.path: /metrics
+  k8s.grafana.com/metrics.portName: http-metrics
+
+webhook:
+  replicaCount: 1
+  podAnnotations:
+    k8s.grafana.com/scrape: "true"
+    k8s.grafana.com/job: cert-manager-webhook
+    k8s.grafana.com/metrics.path: /metrics
+    k8s.grafana.com/metrics.portName: http-metrics
+
+cainjector:
+  replicaCount: 1
+  podAnnotations:
+    k8s.grafana.com/scrape: "true"
+    k8s.grafana.com/job: cert-manager-cainjector
+    k8s.grafana.com/metrics.path: /metrics
+    k8s.grafana.com/metrics.portName: http-metrics

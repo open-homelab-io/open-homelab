@@ -1,0 +1,97 @@
+nameOverride: argocd
+
+crds:
+  install: true
+  keep: true
+
+global:
+  domain: argo.lab.example.com
+  revisionHistoryLimit: 3
+  logging:
+    format: text
+    level: info
+
+configs:
+  cm:
+    create: true
+    application.instanceLabelKey: argocd.argoproj.io/instance
+    admin.enabled: true
+    exec.enabled: false
+    url: https://argo.lab.example.com
+    oidc.config: |
+      name: Keycloak
+      issuer: https://auth.lab.example.com/realms/master
+      clientID: argocd
+      clientSecret: $oidc.keycloak.clientSecret
+      requestedScopes:
+        - openid
+        - profile
+        - email
+    timeout.reconciliation: 180s
+  params:
+    create: true
+    server.insecure: true
+  rbac:
+    create: true
+    policy.default: role:readonly
+    policy.csv: |
+      g, admin@example.com, role:admin
+    scopes: "[email, groups]"
+
+controller:
+  replicas: 1
+  metrics:
+    enabled: true
+    service:
+      annotations:
+        k8s.grafana.com/scrape: "true"
+        k8s.grafana.com/job: argocd-controller
+        k8s.grafana.com/metrics.path: /metrics
+        k8s.grafana.com/metrics.portName: http-metrics
+
+repoServer:
+  replicas: 1
+  metrics:
+    enabled: true
+    service:
+      annotations:
+        k8s.grafana.com/scrape: "true"
+        k8s.grafana.com/job: argocd-repo-server
+        k8s.grafana.com/metrics.path: /metrics
+        k8s.grafana.com/metrics.portName: http-metrics
+
+server:
+  replicas: 1
+  service:
+    type: ClusterIP
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    hostname: argo.lab.example.com
+    annotations: {}
+    tls: true
+  metrics:
+    enabled: true
+    service:
+      annotations:
+        k8s.grafana.com/scrape: "true"
+        k8s.grafana.com/job: argocd-server
+        k8s.grafana.com/metrics.path: /metrics
+        k8s.grafana.com/metrics.portName: http-metrics
+
+applicationSet:
+  replicas: 1
+  metrics:
+    enabled: true
+    service:
+      annotations:
+        k8s.grafana.com/scrape: "true"
+        k8s.grafana.com/job: argocd-applicationset
+        k8s.grafana.com/metrics.path: /metrics
+        k8s.grafana.com/metrics.portName: http-metrics
+
+dex:
+  enabled: false
+
+redis-ha:
+  enabled: false

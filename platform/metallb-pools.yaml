@@ -1,0 +1,24 @@
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: homelab-lbs
+  namespace: metallb-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  addresses:
+    - 192.168.5.45-192.168.5.53
+    - 192.168.5.80-192.168.5.90
+  autoAssign: true
+  avoidBuggyIPs: false
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: homelab-lbs
+  namespace: metallb-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  ipAddressPools:
+    - homelab-lbs

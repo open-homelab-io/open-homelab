@@ -1,0 +1,57 @@
+fullnameOverride: longhorn-oauth2-proxy
+
+config:
+  existingSecret: longhorn-oauth2-proxy
+  cookieName: longhorn-oauth2
+  emailDomains:
+    - example.com
+  upstreams:
+    - http://longhorn-frontend.longhorn-system.svc.cluster.local:80
+
+extraArgs:
+  provider: keycloak-oidc
+  oidc-issuer-url: https://auth.lab.example.com/realms/master
+  oidc-extra-audience: account
+  redirect-url: https://longhorn.lab.example.com/oauth2/callback
+  reverse-proxy: "true"
+  trusted-proxy-ip: 10.244.0.0/16
+  pass-host-header: "true"
+  set-xauthrequest: "true"
+  pass-access-token: "true"
+  pass-authorization-header: "true"
+  skip-provider-button: "true"
+  ssl-insecure-skip-verify: "true"
+  cookie-secure: "true"
+  cookie-samesite: lax
+
+authenticatedEmailsFile:
+  enabled: true
+  restricted_access: |-
+    admin@example.com
+
+service:
+  type: ClusterIP
+  portNumber: 80
+
+ingress:
+  enabled: true
+  className: traefik
+  path: /
+  pathType: Prefix
+  hosts:
+    - longhorn.lab.example.com
+  annotations: {}
+  tls:
+    - secretName: longhorn-oauth2-proxy-tls
+      hosts:
+        - longhorn.lab.example.com
+
+resources:
+  requests:
+    cpu: 25m
+    memory: 64Mi
+  limits:
+    memory: 256Mi
+
+metrics:
+  enabled: false

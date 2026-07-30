@@ -1,0 +1,15 @@
+{
+  "language": "typescript",
+  "app": "bunx tsx src/main.ts",
+  "projectId": "open-homelab-proxmox",
+  "sendCrashReports": false,
+  "targetVersions": {
+    "terraform": ">=1.10.0",
+    "opentofu": ">=1.10.0"
+  },
+  "terraformProviders": [
+    "bpg/proxmox@0.111.1"
+  ],
+  "terraformModules": [],
+  "context": {}
+}

@@ -1,0 +1,347 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: keycloak-bootstrap-platform-sso-v6
+  namespace: keycloak
+  annotations:
+    argocd.argoproj.io/sync-wave: "30"
+spec:
+  backoffLimit: 6
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: bootstrap-admin-user
+          image: quay.io/keycloak/keycloak:26.7.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: KEYCLOAK_URL
+              value: http://keycloak-service.keycloak.svc.cluster.local
+            - name: BOOTSTRAP_ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-bootstrap-admin
+                  key: username
+            - name: BOOTSTRAP_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-bootstrap-admin
+                  key: password
+            - name: FIRST_ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-first-admin
+                  key: username
+            - name: FIRST_ADMIN_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-first-admin
+                  key: email
+            - name: FIRST_ADMIN_TEMP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-first-admin
+                  key: temporary_password
+            - name: FIRST_ADMIN_FIRST_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-first-admin
+                  key: first_name
+            - name: FIRST_ADMIN_LAST_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-first-admin
+                  key: last_name
+            - name: ARGOCD_OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-platform-oidc-clients
+                  key: argocd_client_secret
+            - name: OPENBAO_OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-platform-oidc-clients
+                  key: openbao_client_secret
+            - name: LONGHORN_OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-platform-oidc-clients
+                  key: longhorn_client_secret
+            - name: GRAFANA_OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-platform-oidc-clients
+                  key: grafana_client_secret
+            - name: HARBOR_OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-platform-oidc-clients
+                  key: harbor_client_secret
+          command:
+            - /bin/sh
+            - -ec
+          args:
+            - |
+              kcadm="/opt/keycloak/bin/kcadm.sh"
+              config="/tmp/kcadm.config"
+              realm="master"
+
+              client_uuid() {
+                client_id="$1"
+                "${kcadm}" get clients \
+                  --config "${config}" \
+                  -r "${realm}" \
+                  -q clientId="${client_id}" \
+                  | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' \
+                  | head -1
+              }
+
+              ensure_oidc_client() {
+                client_id="$1"
+                client_secret="$2"
+                redirect_uris="$3"
+                web_origins="$4"
+
+                existing_id="$(client_uuid "${client_id}")"
+
+                if [ -z "${existing_id}" ]; then
+                  "${kcadm}" create clients \
+                    --config "${config}" \
+                    -r "${realm}" \
+                    -s clientId="${client_id}" \
+                    -s name="${client_id}" \
+                    -s enabled=true \
+                    -s protocol=openid-connect \
+                    -s publicClient=false \
+                    -s standardFlowEnabled=true \
+                    -s directAccessGrantsEnabled=false \
+                    -s serviceAccountsEnabled=false \
+                    -s secret="${client_secret}" \
+                    -s "redirectUris=${redirect_uris}" \
+                    -s "webOrigins=${web_origins}" >/dev/null
+                else
+                  "${kcadm}" update "clients/${existing_id}" \
+                    --config "${config}" \
+                    -r "${realm}" \
+                    -s enabled=true \
+                    -s protocol=openid-connect \
+                    -s publicClient=false \
+                    -s standardFlowEnabled=true \
+                    -s directAccessGrantsEnabled=false \
+                    -s serviceAccountsEnabled=false \
+                    -s secret="${client_secret}" \
+                    -s "redirectUris=${redirect_uris}" \
+                    -s "webOrigins=${web_origins}" >/dev/null
+                fi
+              }
+
+              ensure_group() {
+                group_name="$1"
+                group_id="$("${kcadm}" get groups \
+                  --config "${config}" \
+                  -r "${realm}" \
+                  -q search="${group_name}" \
+                  | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' \
+                  | head -1)"
+
+                if [ -z "${group_id}" ]; then
+                  "${kcadm}" create groups \
+                    --config "${config}" \
+                    -r "${realm}" \
+                    -s name="${group_name}" >/dev/null
+
+                  group_id="$("${kcadm}" get groups \
+                    --config "${config}" \
+                    -r "${realm}" \
+                    -q search="${group_name}" \
+                    | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' \
+                    | head -1)"
+                fi
+
+                if [ -z "${group_id}" ]; then
+                  echo "Could not find or create Keycloak group ${group_name}." >&2
+                  exit 1
+                fi
+
+                echo "${group_id}"
+              }
+
+              ensure_user_in_group() {
+                group_name="$1"
+                group_id="$2"
+
+                if ! "${kcadm}" get "users/${user_id}/groups" \
+                  --config "${config}" \
+                  -r "${realm}" \
+                  | grep -q "\"name\"[[:space:]]*:[[:space:]]*\"${group_name}\""; then
+                  "${kcadm}" update "users/${user_id}/groups/${group_id}" \
+                    --config "${config}" \
+                    -r "${realm}" \
+                    -n >/dev/null
+                fi
+              }
+
+              ensure_group_mapper() {
+                client_id="$1"
+                mapper_name="$2"
+                client_id_value="$(client_uuid "${client_id}")"
+
+                if [ -z "${client_id_value}" ]; then
+                  echo "Could not find Keycloak client ${client_id} for group mapper." >&2
+                  exit 1
+                fi
+
+                if ! "${kcadm}" get "clients/${client_id_value}/protocol-mappers/models" \
+                  --config "${config}" \
+                  -r "${realm}" \
+                  | grep -q "\"name\"[[:space:]]*:[[:space:]]*\"${mapper_name}\""; then
+                  "${kcadm}" create "clients/${client_id_value}/protocol-mappers/models" \
+                    --config "${config}" \
+                    -r "${realm}" \
+                    -s name="${mapper_name}" \
+                    -s protocol=openid-connect \
+                    -s protocolMapper=oidc-group-membership-mapper \
+                    -s 'config."claim.name"=groups' \
+                    -s 'config."full.path"=false' \
+                    -s 'config."id.token.claim"=true' \
+                    -s 'config."access.token.claim"=true' \
+                    -s 'config."userinfo.token.claim"=true' >/dev/null
+                fi
+              }
+
+              ensure_metrics_event_listener() {
+                "${kcadm}" update events/config \
+                  --config "${config}" \
+                  -r "${realm}" \
+                  -s eventsEnabled=true \
+                  -s adminEventsEnabled=true >/dev/null
+
+                if ! "${kcadm}" get events/config \
+                  --config "${config}" \
+                  -r "${realm}" \
+                  | grep -q '"metrics-listener"'; then
+                  "${kcadm}" update events/config \
+                    --config "${config}" \
+                    -r "${realm}" \
+                    -s "eventsListeners+=metrics-listener" >/dev/null
+                fi
+              }
+
+              for attempt in $(seq 1 60); do
+                if "${kcadm}" config credentials \
+                  --config "${config}" \
+                  --server "${KEYCLOAK_URL}" \
+                  --realm "${realm}" \
+                  --user "${BOOTSTRAP_ADMIN_USERNAME}" \
+                  --password "${BOOTSTRAP_ADMIN_PASSWORD}" >/dev/null 2>&1; then
+                  break
+                fi
+
+                if [ "${attempt}" = "60" ]; then
+                  echo "Timed out waiting for Keycloak admin API." >&2
+                  exit 1
+                fi
+
+                sleep 10
+              done
+
+              user_id="$("${kcadm}" get users \
+                --config "${config}" \
+                -r "${realm}" \
+                -q exact=true \
+                -q username="${FIRST_ADMIN_USERNAME}" \
+                | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' \
+                | head -1)"
+
+              user_created=false
+
+              if [ -z "${user_id}" ]; then
+                "${kcadm}" create users \
+                  --config "${config}" \
+                  -r "${realm}" \
+                  -s username="${FIRST_ADMIN_USERNAME}" \
+                  -s email="${FIRST_ADMIN_EMAIL}" \
+                  -s enabled=true \
+                  -s emailVerified=true \
+                  -s firstName="${FIRST_ADMIN_FIRST_NAME}" \
+                  -s lastName="${FIRST_ADMIN_LAST_NAME}" \
+                  -s 'requiredActions=["UPDATE_PASSWORD"]' >/dev/null
+
+                user_id="$("${kcadm}" get users \
+                  --config "${config}" \
+                  -r "${realm}" \
+                  -q exact=true \
+                  -q username="${FIRST_ADMIN_USERNAME}" \
+                  | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' \
+                  | head -1)"
+
+                user_created=true
+              else
+                "${kcadm}" update "users/${user_id}" \
+                  --config "${config}" \
+                  -r "${realm}" \
+                  -s email="${FIRST_ADMIN_EMAIL}" \
+                  -s enabled=true \
+                  -s emailVerified=true \
+                  -s firstName="${FIRST_ADMIN_FIRST_NAME}" \
+                  -s lastName="${FIRST_ADMIN_LAST_NAME}" >/dev/null
+              fi
+
+              if [ -z "${user_id}" ]; then
+                echo "Could not find or create Keycloak user ${FIRST_ADMIN_USERNAME}." >&2
+                exit 1
+              fi
+
+              if [ "${user_created}" = "true" ]; then
+                "${kcadm}" set-password \
+                  --config "${config}" \
+                  -r "${realm}" \
+                  --userid "${user_id}" \
+                  --new-password "${FIRST_ADMIN_TEMP_PASSWORD}" \
+                  -t >/dev/null
+              fi
+
+              "${kcadm}" add-roles \
+                --config "${config}" \
+                -r "${realm}" \
+                --uusername "${FIRST_ADMIN_USERNAME}" \
+                --rolename admin >/dev/null
+
+              harbor_admin_group_id="$(ensure_group "harbor-admins")"
+              ensure_user_in_group "harbor-admins" "${harbor_admin_group_id}"
+
+              ensure_oidc_client \
+                "argocd" \
+                "${ARGOCD_OIDC_CLIENT_SECRET}" \
+                '["https://argo.lab.example.com/auth/callback"]' \
+                '["https://argo.lab.example.com"]'
+
+              ensure_oidc_client \
+                "openbao" \
+                "${OPENBAO_OIDC_CLIENT_SECRET}" \
+                '["https://bao.lab.example.com/ui/vault/auth/oidc/oidc/callback","http://localhost:8250/oidc/callback"]' \
+                '["https://bao.lab.example.com"]'
+
+              ensure_oidc_client \
+                "longhorn" \
+                "${LONGHORN_OIDC_CLIENT_SECRET}" \
+                '["https://longhorn.lab.example.com/oauth2/callback"]' \
+                '["https://longhorn.lab.example.com"]'
+
+              ensure_oidc_client \
+                "grafana" \
+                "${GRAFANA_OIDC_CLIENT_SECRET}" \
+                '["https://grafana.lab.example.com/login/generic_oauth"]' \
+                '["https://grafana.lab.example.com"]'
+
+              ensure_oidc_client \
+                "harbor" \
+                "${HARBOR_OIDC_CLIENT_SECRET}" \
+                '["https://harbor.lab.example.com/c/oidc/callback"]' \
+                '["https://harbor.lab.example.com"]'
+
+              ensure_group_mapper "harbor" "harbor-groups"
+
+              ensure_metrics_event_listener
+
+              echo "Keycloak first admin user and platform OIDC clients are ready."

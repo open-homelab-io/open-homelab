@@ -1,0 +1,43 @@
+extraEnv:
+  - name: AWS_REGION
+    value: us-east-1
+  - name: AWS_EC2_METADATA_SERVICE_ENDPOINT
+    value: http://127.0.0.1:9911
+  - name: AWS_EC2_METADATA_DISABLED
+    value: "false"
+
+extraContainers:
+  - name: rolesanywhere-credential-helper
+    image: public.ecr.aws/rolesanywhere/credential-helper:latest
+    imagePullPolicy: IfNotPresent
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+    command:
+      - aws_signing_helper
+    args:
+      - serve
+      - --private-key
+      - /etc/rolesanywhere/tls.key
+      - --certificate
+      - /etc/rolesanywhere/tls.crt
+      - --role-arn
+      - $(ROLESANYWHERE_ROLE_ARN)
+      - --profile-arn
+      - $(ROLESANYWHERE_PROFILE_ARN)
+      - --trust-anchor-arn
+      - $(ROLESANYWHERE_TRUST_ANCHOR_ARN)
+    envFrom:
+      - configMapRef:
+          name: rolesanywhere-dns
+    volumeMounts:
+      - name: rolesanywhere-certificate
+        mountPath: /etc/rolesanywhere
+        readOnly: true
+
+volumes:
+  - name: rolesanywhere-certificate
+    secret:
+      secretName: rolesanywhere-certificate

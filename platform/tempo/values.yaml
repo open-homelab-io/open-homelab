@@ -1,0 +1,23 @@
+tempo:
+  reportingEnabled: false
+  retention: 168h
+  metricsGenerator:
+    enabled: true
+    remoteWriteUrl: http://mimir-gateway.observability.svc.cluster.local/api/v1/push
+    processor:
+      service_graphs: {}
+      span_metrics: {}
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+persistence:
+  enabled: true
+  storageClassName: longhorn
+  accessModes:
+    - ReadWriteOnce
+  size: 20Gi
+
+service:
+  type: ClusterIP

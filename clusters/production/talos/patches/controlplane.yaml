@@ -1,0 +1,14 @@
+machine:
+  kubelet:
+    extraArgs:
+      rotate-server-certificates: "true"
+cluster:
+  # Flannel is replaced by Cilium. Talos ships no CNI so Cilium is
+  # installed out-of-band during bootstrap (scripts/bootstrap-cilium.sh)
+  # and managed by Argo CD afterward (gitops/root/cilium.yaml).
+  network:
+    cni:
+      name: none
+  # kube-proxy is disabled; Cilium runs in kube-proxy replacement mode.
+  proxy:
+    disabled: true

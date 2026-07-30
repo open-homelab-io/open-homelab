@@ -1,0 +1,78 @@
+global:
+  enabled: true
+  tlsDisable: true
+
+injector:
+  enabled: false
+
+server:
+  enabled: true
+  podManagementPolicy: Parallel
+  logLevel: info
+  logFormat: standard
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  ingress:
+    enabled: true
+    annotations: {}
+    ingressClassName: traefik
+    hosts:
+      - host: bao.lab.example.com
+        paths:
+          - /
+    tls:
+      - secretName: openbao-tls
+        hosts:
+          - bao.lab.example.com
+
+  dataStorage:
+    enabled: true
+    size: 10Gi
+    storageClass: longhorn
+    accessMode: ReadWriteOnce
+
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+
+  auditStorage:
+    enabled: false
+
+  standalone:
+    enabled: false
+
+  ha:
+    enabled: true
+    replicas: 3
+    clusterAddr: http://$(HOSTNAME).openbao-internal:8201
+    raft:
+      enabled: true
+      setNodeId: true
+      config: |
+        ui = true
+
+        listener "tcp" {
+          tls_disable = 1
+          address = "[::]:8200"
+          cluster_address = "[::]:8201"
+        }
+
+        storage "raft" {
+          path = "/openbao/data"
+        }
+
+        service_registration "kubernetes" {}
+
+  service:
+    type: ClusterIP
+
+ui:
+  enabled: true
+  serviceType: ClusterIP

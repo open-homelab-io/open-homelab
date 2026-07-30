@@ -1,0 +1,47 @@
+deploymentMode: SingleBinary
+
+loki:
+  auth_enabled: false
+  commonConfig:
+    replication_factor: 1
+  storage:
+    type: filesystem
+  schemaConfig:
+    configs:
+      - from: "2024-04-01"
+        store: tsdb
+        object_store: filesystem
+        schema: v13
+        index:
+          prefix: loki_index_
+          period: 24h
+  limits_config:
+    retention_period: 168h
+
+singleBinary:
+  replicas: 1
+  persistence:
+    enabled: true
+    storageClass: longhorn
+    accessModes:
+      - ReadWriteOnce
+    size: 50Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+
+read:
+  replicas: 0
+
+write:
+  replicas: 0
+
+backend:
+  replicas: 0
+
+lokiCanary:
+  enabled: false
+
+test:
+  enabled: false

@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.gen/
+cdktf.out/
+.env
+.env.*
+!.env.example
+.terraform/
+.terraform.lock.hcl
+terraform.*
+*.tfstate
+*.tfstate.*

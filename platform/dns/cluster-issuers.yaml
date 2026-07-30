@@ -1,0 +1,37 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+spec:
+  acme:
+    email: admin@example.com
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: letsencrypt-staging
+    solvers:
+      - selector:
+          dnsZones:
+            - example.com
+        dns01:
+          route53:
+            region: us-east-1
+            hostedZoneID: Z00000000000000000000
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    email: admin@example.com
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+      - selector:
+          dnsZones:
+            - example.com
+        dns01:
+          route53:
+            region: us-east-1
+            hostedZoneID: Z00000000000000000000

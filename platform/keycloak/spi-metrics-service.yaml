@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak-spi-metrics
+  namespace: keycloak
+  labels:
+    app: keycloak
+    app.kubernetes.io/component: spi-metrics
+    app.kubernetes.io/instance: keycloak
+  annotations:
+    k8s.grafana.com/scrape: "true"
+    k8s.grafana.com/job: keycloak-spi
+    k8s.grafana.com/metrics.path: /realms/master/metrics
+    k8s.grafana.com/metrics.portName: http
+spec:
+  type: ClusterIP
+  selector:
+    app: keycloak
+    app.kubernetes.io/instance: keycloak
+    app.kubernetes.io/managed-by: keycloak-operator
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: http
