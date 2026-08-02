@@ -8,7 +8,7 @@ Use this mode when you want everything to run on your LAN without cloud dependen
 
 What it uses:
 
-- local Terraform state
+- local OpenTofu state
 - Proxmox for Talos VMs
 - MetalLB for LoadBalancer IPs
 - local DNS or `/etc/hosts`
@@ -58,13 +58,13 @@ local DNS or /etc/hosts -> Traefik LoadBalancer IP -> platform ingresses
 
 TLS browser warnings are expected unless you provide your own trusted local CA or enable the AWS DNS path for public ACME certificates.
 
-## AWS Terraform State
+## AWS OpenTofu State
 
-Use this mode when you want Proxmox Terraform/CDKTN state in S3 instead of a local state file.
+Use this mode when you want Proxmox OpenTofu/CDKTN state in S3 instead of a local state file.
 
 What it adds:
 
-- S3 bucket for Terraform state
+- S3 bucket for OpenTofu state
 - bucket versioning
 - S3-managed encryption
 - native S3 lockfile locking
@@ -72,9 +72,9 @@ What it adds:
 Required `.env` values:
 
 ```bash
-AWS_TERRAFORM_STATE_ENABLED=1
+AWS_OPENTOFU_STATE_ENABLED=1
 AWS_REGION=us-east-1
-TF_STATE_BUCKET=open-homelab-terraform-state-123456789012-us-east-1
+TF_STATE_BUCKET=open-homelab-opentofu-state-123456789012-us-east-1
 TF_STATE_KEY=open-homelab/proxmox/production.tfstate
 ```
 
@@ -83,9 +83,9 @@ Deploy the state bucket:
 ```bash
 cd infra/aws
 bun install
-AWS_TERRAFORM_STATE_ENABLED=1 bun run typecheck
-AWS_TERRAFORM_STATE_ENABLED=1 bun run synth
-AWS_TERRAFORM_STATE_ENABLED=1 bun run deploy open-homelab-terraform-state
+AWS_OPENTOFU_STATE_ENABLED=1 bun run typecheck
+AWS_OPENTOFU_STATE_ENABLED=1 bun run synth
+AWS_OPENTOFU_STATE_ENABLED=1 bun run deploy open-homelab-opentofu-state
 ```
 
 Then migrate Proxmox state:
@@ -95,8 +95,8 @@ cd ../proxmox
 bun run synth
 cd cdktf.out/stacks/production
 set -a; . ../../../../../.env; set +a
-terraform init -migrate-state
-terraform plan
+tofu init -migrate-state
+tofu plan
 ```
 
 ## AWS DNS Automation
@@ -161,9 +161,9 @@ Use local/no-AWS when:
 - you do not own a public Route53 hosted zone
 - local DNS and browser TLS warnings are acceptable
 
-Add AWS Terraform state when:
+Add AWS OpenTofu state when:
 
-- multiple operators need shared Terraform state
+- multiple operators need shared OpenTofu state
 - you want versioned remote state
 - you are comfortable managing an AWS account for state only
 

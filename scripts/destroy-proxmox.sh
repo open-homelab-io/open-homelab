@@ -29,8 +29,8 @@ set -a
 . "$env_file"
 set +a
 
-if ! command -v terraform >/dev/null 2>&1; then
-  echo "terraform is required on PATH." >&2
+if ! command -v tofu >/dev/null 2>&1; then
+  echo "tofu (OpenTofu) is required on PATH." >&2
   exit 1
 fi
 
@@ -42,13 +42,13 @@ if [[ ! -d "$stack_dir" ]]; then
 fi
 
 cd "$stack_dir"
-terraform init -reconfigure
-terraform plan -destroy -out=tfplan.destroy
-terraform show -no-color tfplan.destroy
+tofu init -reconfigure
+tofu plan -destroy -out=tfplan.destroy
+tofu show -no-color tfplan.destroy
 
 if [[ "${PLAN_ONLY:-0}" == "1" ]]; then
   echo "PLAN_ONLY=1 set; no resources destroyed."
   exit 0
 fi
 
-terraform apply tfplan.destroy
+tofu apply tfplan.destroy

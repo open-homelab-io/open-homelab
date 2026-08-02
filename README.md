@@ -4,13 +4,13 @@
 
 The repo owns the whole path from virtual machines to platform services:
 
-1. Proxmox VM provisioning with CDKTN and the `bpg/proxmox` Terraform provider.
+1. Proxmox VM provisioning with CDKTN and the `bpg/proxmox` OpenTofu provider.
 2. Talos Linux machine configuration for Kubernetes nodes.
 3. Argo CD GitOps bootstrap.
 4. Cluster platform services for ingress, storage, identity, secrets, observability, certificates, and DNS.
 5. User workloads such as game servers, Home Assistant, databases, and self-hosted runners.
 
-The default path is local-first and does not require AWS. Optional AWS support adds S3-backed Terraform state plus Route53 DNS automation and public ACME certificates.
+The default path is local-first and does not require AWS. Optional AWS support adds S3-backed OpenTofu state plus Route53 DNS automation and public ACME certificates.
 
 ## What You Get
 
@@ -46,7 +46,7 @@ Prerequisites:
 
 - Proxmox VE cluster or host
 - A routable LAN IP range for Kubernetes nodes and MetalLB
-- `bun`, `terraform`, `kubectl`, `helm`, `talosctl`, `jq`, and `yq`
+- `bun`, `tofu` (OpenTofu), `kubectl`, `helm`, `talosctl`, `jq`, and `yq`
 
 Start here:
 
@@ -86,8 +86,8 @@ Continue with the full guide: [docs/getting-started.md](docs/getting-started.md)
 
 ## Deployment Modes
 
-- `local/no-AWS`: local Terraform state, local DNS or `/etc/hosts`, no Route53, no ExternalDNS, and no public ACME certificates.
-- `AWS state`: optional S3 state backend for Terraform/CDKTN.
+- `local/no-AWS`: local OpenTofu state, local DNS or `/etc/hosts`, no Route53, no ExternalDNS, and no public ACME certificates.
+- `AWS state`: optional S3 state backend for OpenTofu/CDKTN.
 - `AWS DNS`: optional Route53 DNS-01 certificates and ExternalDNS through IAM Roles Anywhere.
 
 The no-AWS path is the default. AWS features are opt-in through environment flags.
@@ -117,7 +117,7 @@ Claude Code can use the repo-local skills in [.claude/skills](.claude/skills):
 
 The checked-in `production` cluster is a working example topology. Before deploying, change the Proxmox node names, datastore names, network bridge, VLAN, IP addresses, domains, hosted zone IDs, and admin identity values to match your environment.
 
-Generated Talos secrets, kubeconfigs, Terraform state, and `.env` are ignored by Git and must stay out of commits.
+Generated Talos secrets, kubeconfigs, OpenTofu state, and `.env` are ignored by Git and must stay out of commits.
 
 ## Contributing
 

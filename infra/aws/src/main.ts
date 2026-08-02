@@ -6,17 +6,17 @@ import { CfnProfile, CfnTrustAnchor } from "aws-cdk-lib/aws-rolesanywhere";
 import { BlockPublicAccess, Bucket, BucketEncryption, ObjectOwnership } from "aws-cdk-lib/aws-s3";
 import { Construct } from "constructs";
 
-class TerraformStateStack extends Stack {
+class OpenTofuStateStack extends Stack {
   public constructor(scope: Construct, id: string, props: StackProps = {}) {
     super(scope, id, props);
 
     const region = Stack.of(this).region;
     const account = Stack.of(this).account;
     const bucketName =
-      process.env.TF_STATE_BUCKET ?? `open-homelab-terraform-state-${account}-${region}`;
+      process.env.TF_STATE_BUCKET ?? `open-homelab-opentofu-state-${account}-${region}`;
     const stateKey = process.env.TF_STATE_KEY ?? "open-homelab/proxmox/production.tfstate";
 
-    const bucket = new Bucket(this, "TerraformStateBucket", {
+    const bucket = new Bucket(this, "OpenTofuStateBucket", {
       bucketName,
       versioned: true,
       encryption: BucketEncryption.S3_MANAGED,
@@ -34,15 +34,15 @@ class TerraformStateStack extends Stack {
     });
 
     Tags.of(bucket).add("Project", "open-homelab");
-    Tags.of(bucket).add("Purpose", "terraform-state");
+    Tags.of(bucket).add("Purpose", "opentofu-state");
 
-    new CfnOutput(this, "TerraformStateBucketName", {
+    new CfnOutput(this, "OpenTofuStateBucketName", {
       value: bucket.bucketName,
     });
-    new CfnOutput(this, "TerraformStateRegion", {
+    new CfnOutput(this, "OpenTofuStateRegion", {
       value: region,
     });
-    new CfnOutput(this, "ProxmoxTerraformStateKey", {
+    new CfnOutput(this, "ProxmoxOpenTofuStateKey", {
       value: stateKey,
     });
   }
@@ -180,8 +180,8 @@ const defaultEnv = {
   region: process.env.CDK_DEFAULT_REGION ?? process.env.AWS_REGION ?? process.env.AWS_DEFAULT_REGION ?? "us-east-1",
 };
 
-if (envFlag("AWS_TERRAFORM_STATE_ENABLED")) {
-  new TerraformStateStack(app, "open-homelab-terraform-state", {
+if (envFlag("AWS_OPENTOFU_STATE_ENABLED")) {
+  new OpenTofuStateStack(app, "open-homelab-opentofu-state", {
     env: defaultEnv,
   });
 }

@@ -30,7 +30,7 @@ Common application migration targets:
 
 1. Fill in real Proxmox settings in `infra/proxmox/config/production.yaml`.
 2. Add or import the Talos image/template in Proxmox.
-3. Run CDKTN synth and review the generated Terraform JSON.
+3. Run CDKTN synth and review the generated OpenTofu JSON.
 4. Apply the Proxmox VM layer.
 5. Generate Talos machine config for `controller-1` and workers.
 6. Bootstrap Kubernetes.
