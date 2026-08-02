@@ -9,7 +9,7 @@ import { VirtualEnvironmentDownloadFile } from "../.gen/providers/proxmox/virtua
 import { VirtualEnvironmentVm, VirtualEnvironmentVmDisk } from "../.gen/providers/proxmox/virtual-environment-vm/index.js";
 
 type NodeRole = "controlplane" | "worker";
-const terraformNull = null as unknown as undefined;
+const tofuNull = null as unknown as undefined;
 
 interface LabNode {
   name: string;
@@ -160,15 +160,15 @@ class ProxmoxStack extends TerraformStack {
           {
             bridge: config.proxmox.networkBridge,
             disconnected: false,
-            enabled: terraformNull,
+            enabled: tofuNull,
             firewall: false,
-            macAddress: node.macAddress ?? terraformNull,
+            macAddress: node.macAddress ?? tofuNull,
             model: "virtio",
-            mtu: terraformNull,
-            queues: terraformNull,
-            rateLimit: terraformNull,
-            trunks: terraformNull,
-            vlanId: config.proxmox.vlanId ?? terraformNull,
+            mtu: tofuNull,
+            queues: tofuNull,
+            rateLimit: tofuNull,
+            trunks: tofuNull,
+            vlanId: config.proxmox.vlanId ?? tofuNull,
           },
         ],
         initialization: {

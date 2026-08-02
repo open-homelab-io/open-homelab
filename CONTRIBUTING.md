@@ -70,4 +70,4 @@ Releases are managed by Release Please from Conventional Commit messages on `mai
 
 ## Secrets
 
-Never commit real credentials, kubeconfigs, Talos secrets, Terraform state, OpenBao tokens, ACME account keys, private certificates, or personal hosted zone IDs.
+Never commit real credentials, kubeconfigs, Talos secrets, OpenTofu state, OpenBao tokens, ACME account keys, private certificates, or personal hosted zone IDs.

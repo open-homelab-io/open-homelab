@@ -24,7 +24,7 @@ Never commit:
 - `.env`
 - Talos `secrets.yaml`
 - generated kubeconfigs or talosconfigs
-- Terraform state
+- OpenTofu state
 - OpenBao unseal keys, recovery keys, root tokens, or app secrets
 - IAM Roles Anywhere private keys and certificates
 - Proxmox API tokens

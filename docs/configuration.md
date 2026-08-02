@@ -16,7 +16,7 @@ Required for local/no-AWS:
 
 Optional for AWS state:
 
-- `AWS_TERRAFORM_STATE_ENABLED=1`
+- `AWS_OPENTOFU_STATE_ENABLED=1`
 - `AWS_REGION`
 - `TF_STATE_BUCKET`
 - `TF_STATE_KEY`
@@ -109,7 +109,7 @@ Use `GITHUB_TOKEN` or an authenticated `gh` CLI session when the repo is private
 Do not commit:
 
 - `.env`
-- Terraform state
+- OpenTofu state
 - Talos `secrets.yaml`
 - generated kubeconfigs and talosconfigs
 - OpenBao unseal keys or root tokens

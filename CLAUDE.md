@@ -7,7 +7,7 @@ This repo is a public, code-first homelab template. Help users bring it online s
 Use repo-local Claude skills when the task matches:
 
 - `.claude/skills/open-homelab-local-bringup/SKILL.md`: default local/no-AWS deployment, bootstrap, validation, and recovery.
-- `.claude/skills/open-homelab-aws-bringup/SKILL.md`: optional S3 Terraform state, Route53 DNS automation, IAM Roles Anywhere, ExternalDNS, and public ACME certificates.
+- `.claude/skills/open-homelab-aws-bringup/SKILL.md`: optional S3 OpenTofu state, Route53 DNS automation, IAM Roles Anywhere, ExternalDNS, and public ACME certificates.
 
 ## First Docs To Read
 
@@ -21,7 +21,7 @@ Use repo-local Claude skills when the task matches:
 
 Default to local/no-AWS unless the user explicitly asks for AWS:
 
-- local Terraform state
+- local OpenTofu state
 - Proxmox VMs
 - Talos Kubernetes
 - Cilium
@@ -31,7 +31,7 @@ Default to local/no-AWS unless the user explicitly asks for AWS:
 
 AWS is opt-in:
 
-- `AWS_TERRAFORM_STATE_ENABLED=1` for S3 Terraform state
+- `AWS_OPENTOFU_STATE_ENABLED=1` for S3 OpenTofu state
 - `AWS_DNS_AUTOMATION_ENABLED=1` for Route53, IAM Roles Anywhere, ExternalDNS, and DNS-01 certificates
 - AWS-enabled GitOps path requires `ALLOW_AWS_GITOPS=1 GITOPS_ROOT_PATH=clusters/production/gitops`
 
@@ -44,7 +44,7 @@ Never print or commit:
 - AWS credentials
 - Talos `secrets.yaml`
 - generated kubeconfigs or talosconfigs
-- Terraform state
+- OpenTofu state
 - OpenBao root tokens, unseal keys, recovery keys, or generated app secrets
 - IAM Roles Anywhere private keys or certificates
 

@@ -4,10 +4,10 @@
   "type": "module",
   "packageManager": "bun@1.3.14",
   "scripts": {
-    "get": "bun --env-file=../../.env ./node_modules/cdktn-cli/bin/cdktn get",
-    "synth": "bun --env-file=../../.env ./node_modules/cdktn-cli/bin/cdktn synth",
-    "diff": "bun --env-file=../../.env ./node_modules/cdktn-cli/bin/cdktn diff",
-    "deploy": "bun --env-file=../../.env ./node_modules/cdktn-cli/bin/cdktn deploy",
+    "get": "TERRAFORM_BINARY_NAME=tofu bun --env-file=../../.env ./node_modules/cdktn-cli/bin/cdktn get",
+    "synth": "TERRAFORM_BINARY_NAME=tofu bun --env-file=../../.env ./node_modules/cdktn-cli/bin/cdktn synth",
+    "diff": "TERRAFORM_BINARY_NAME=tofu bun --env-file=../../.env ./node_modules/cdktn-cli/bin/cdktn diff",
+    "deploy": "TERRAFORM_BINARY_NAME=tofu bun --env-file=../../.env ./node_modules/cdktn-cli/bin/cdktn deploy",
     "typecheck": "bunx tsc --noEmit"
   },
   "dependencies": {

@@ -75,13 +75,13 @@ Preview first:
 CONFIRM_DESTROY_HOMELAB="destroy homelab" PLAN_ONLY=1 ./scripts/destroy-proxmox.sh
 ```
 
-Destroy Terraform-managed VMs:
+Destroy OpenTofu-managed VMs:
 
 ```bash
 CONFIRM_DESTROY_HOMELAB="destroy homelab" ./scripts/destroy-proxmox.sh
 ```
 
-If local Terraform state is missing but the VMs exist in Proxmox, use the direct cleanup script. It only targets VM IDs listed in `infra/proxmox/config/production.yaml`.
+If local OpenTofu state is missing but the VMs exist in Proxmox, use the direct cleanup script. It only targets VM IDs listed in `infra/proxmox/config/production.yaml`.
 
 ```bash
 ./scripts/destroy-proxmox-vms.sh
@@ -125,6 +125,6 @@ Before destructive work, capture:
 - OpenBao recovery material and root-token state according to your own secret-handling policy
 - exported Kubernetes manifests for anything not managed by GitOps
 - Longhorn backups or snapshots for persistent volumes
-- Terraform state if using local state
+- OpenTofu state if using local state
 
 The repo intentionally does not prescribe a global backup provider yet.

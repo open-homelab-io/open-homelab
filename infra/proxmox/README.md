@@ -1,6 +1,6 @@
 # Proxmox CDKTN Layer
 
-This CDKTN app provisions Proxmox VMs with the `bpg/proxmox` Terraform provider.
+This CDKTN app provisions Proxmox VMs with the `bpg/proxmox` OpenTofu provider.
 
 It uses generated CDKTN bindings from `.gen/providers/proxmox`. Run `bun run get` after install and whenever the provider version changes.
 
@@ -16,21 +16,21 @@ bun run typecheck
 bun run synth
 ```
 
-Edit the root `.env` with the real Proxmox endpoint and token before planning or applying. The Bun scripts load `../../.env` so Terraform provider credentials stay in process environment instead of synthesized JSON.
+Edit the root `.env` with the real Proxmox endpoint and token before planning or applying. The Bun scripts load `../../.env` so OpenTofu provider credentials stay in process environment instead of synthesized JSON.
 
 Use `LAB_CONFIG=infra/proxmox/config/production.yaml` in the root `.env` to point at a different config file. Relative paths are resolved from the repo root.
 
-`bun run get` requires a `terraform` executable on `PATH`; CDKTN shells out to Terraform while generating provider bindings.
+`bun run get` requires a `tofu` executable on `PATH`; the Bun scripts set `TERRAFORM_BINARY_NAME=tofu`, so CDKTN shells out to OpenTofu while generating provider bindings.
 
 If `TF_STATE_BUCKET` is set in the root `.env`, the stack synthesizes an S3 backend with native lockfile locking:
 
 ```bash
 AWS_REGION=us-east-1
-TF_STATE_BUCKET=open-homelab-terraform-state-123456789012-us-east-1
+TF_STATE_BUCKET=open-homelab-opentofu-state-123456789012-us-east-1
 TF_STATE_KEY=open-homelab/proxmox/production.tfstate
 ```
 
-After enabling those values for an existing local state, run `terraform init -migrate-state` from `cdktf.out/stacks/production`.
+After enabling those values for an existing local state, run `tofu init -migrate-state` from `cdktf.out/stacks/production`.
 
 If Proxmox node hostnames are not resolvable during apply, fill in the optional `proxmox.ssh.nodes` block in `config/production.yaml`. The `bpg/proxmox` provider supports explicit SSH node address mappings, which avoids relying on hostname lookup for each Proxmox node.
 
@@ -44,7 +44,7 @@ Sample production config notes:
 
 ## Apply
 
-Install either Terraform or OpenTofu, then run:
+Install OpenTofu, then run:
 
 ```bash
 bun run diff
@@ -56,14 +56,14 @@ For non-interactive apply from the synthesized stack:
 ```bash
 cd cdktf.out/stacks/production
 set -a; . ../../../../../.env; set +a
-terraform apply -auto-approve
+tofu apply -auto-approve
 ```
 
 The API token must be allowed to allocate and configure VMs on the target nodes and storage. A 403 during VM creation means the token is valid but its effective ACLs are too narrow. Check both the user and the API token if token privilege separation is enabled.
 
 ## Destroy
 
-The root destroy helper targets the synthesized `production` stack and refuses to run unless you provide the confirmation phrase. If `TF_STATE_BUCKET` is set in the root `.env`, it uses the S3 backend for Terraform state.
+The root destroy helper targets the synthesized `production` stack and refuses to run unless you provide the confirmation phrase. If `TF_STATE_BUCKET` is set in the root `.env`, it uses the S3 backend for OpenTofu state.
 
 Preview first:
 
@@ -77,7 +77,7 @@ Destroy:
 CONFIRM_DESTROY_HOMELAB="destroy homelab" ./scripts/destroy-proxmox.sh
 ```
 
-If Terraform reports that it has no objects to destroy but the configured VMs still exist in Proxmox, preview and then run the direct VM cleanup helper:
+If OpenTofu reports that it has no objects to destroy but the configured VMs still exist in Proxmox, preview and then run the direct VM cleanup helper:
 
 ```bash
 ./scripts/destroy-proxmox-vms.sh
@@ -97,6 +97,6 @@ done
 
 ## Provider Notes
 
-The Terraform provider constraint is pinned in `cdktf.json` to `bpg/proxmox@0.111.1`, which was the latest stable version visible from the Terraform Registry metadata during scaffold creation.
+The OpenTofu provider constraint is pinned in `cdktf.json` to `bpg/proxmox@0.111.1`, which was the latest stable version visible from the OpenTofu Registry metadata during scaffold creation.
 
 Review the synthesized JSON before the first apply. Proxmox provider schemas change over time, and the raw adapter intentionally exposes the provider attribute names directly.

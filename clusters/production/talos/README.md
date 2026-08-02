@@ -55,12 +55,12 @@ cd infra/proxmox
 bun run synth
 cd cdktf.out/stacks/production
 set -a; . ../../../../../.env; set +a
-terraform plan
-terraform apply
+tofu plan
+tofu apply
 cd ../../../../..
 ```
 
-The Terraform config attaches a second worker-only disk at `scsi1`. Talos provisions that disk as a `UserVolumeConfig` named `longhorn`, mounted at `/var/mnt/longhorn`.
+The OpenTofu config attaches a second worker-only disk at `scsi1`. Talos provisions that disk as a `UserVolumeConfig` named `longhorn`, mounted at `/var/mnt/longhorn`.
 
 After the Proxmox disks are attached, apply the staged kubelet mount config and roll the nodes through the extension-bearing Talos installer:
 

@@ -7,7 +7,7 @@ This guide deploys the default local/no-AWS path: Proxmox VMs, Talos Kubernetes,
 Install these tools on your workstation:
 
 - `bun`
-- `terraform`
+- `tofu` (OpenTofu)
 - `kubectl`
 - `helm`
 - `talosctl`
@@ -75,7 +75,7 @@ bun run deploy
 cd ../..
 ```
 
-The CDKTN CLI currently shells out to `terraform` during provider generation, even if you prefer OpenTofu for later Terraform operations.
+The Bun scripts set `TERRAFORM_BINARY_NAME=tofu`, so the CDKTN CLI shells out to OpenTofu (`tofu`) for provider generation and all later operations. Make sure `tofu` is on `PATH`.
 
 ## 6. Bootstrap Kubernetes
 
@@ -194,15 +194,15 @@ Browser TLS warnings are expected on the no-AWS path because public DNS-01 ACME 
 
 ## Optional AWS Path
 
-AWS resources are opt-in. Leave the AWS variables commented in `.env` to avoid Route53, IAM Roles Anywhere, and S3-backed Terraform state.
+AWS resources are opt-in. Leave the AWS variables commented in `.env` to avoid Route53, IAM Roles Anywhere, and S3-backed OpenTofu state.
 
-To use S3 for Terraform state:
+To use S3 for OpenTofu state:
 
 ```bash
 cd infra/aws
 bun install
-AWS_TERRAFORM_STATE_ENABLED=1 bun run synth
-AWS_TERRAFORM_STATE_ENABLED=1 bun run deploy open-homelab-terraform-state
+AWS_OPENTOFU_STATE_ENABLED=1 bun run synth
+AWS_OPENTOFU_STATE_ENABLED=1 bun run deploy open-homelab-opentofu-state
 ```
 
 Then set `AWS_REGION`, `TF_STATE_BUCKET`, and `TF_STATE_KEY` in `.env` before migrating Proxmox state.

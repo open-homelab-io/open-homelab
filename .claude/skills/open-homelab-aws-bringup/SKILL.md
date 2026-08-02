@@ -1,6 +1,6 @@
 ---
 name: open-homelab-aws-bringup
-description: Add AWS-backed Terraform state or Route53 DNS automation to open-homelab. Use when the user wants S3 state, AWS, Route53, IAM Roles Anywhere, ExternalDNS, DNS-01 certificates, public ACME certificates, or AWS-enabled GitOps.
+description: Add AWS-backed OpenTofu state or Route53 DNS automation to open-homelab. Use when the user wants S3 state, AWS, Route53, IAM Roles Anywhere, ExternalDNS, DNS-01 certificates, public ACME certificates, or AWS-enabled GitOps.
 ---
 
 # Open Homelab AWS Bring-Up
@@ -15,18 +15,18 @@ Use this skill only for AWS add-ons. The base cluster still comes online through
 - `bootstrap/secrets/README.md`
 - `clusters/production/gitops/README.md`
 
-AWS has two independent paths: S3 Terraform state and Route53 DNS automation.
+AWS has two independent paths: S3 OpenTofu state and Route53 DNS automation.
 
 Do not enable AWS DNS automation implicitly; it creates real AWS IAM and Route53 resources.
 
-## AWS Terraform State
+## AWS OpenTofu State
 
 Required `.env` values:
 
 ```bash
-AWS_TERRAFORM_STATE_ENABLED=1
+AWS_OPENTOFU_STATE_ENABLED=1
 AWS_REGION=us-east-1
-TF_STATE_BUCKET=open-homelab-terraform-state-123456789012-us-east-1
+TF_STATE_BUCKET=open-homelab-opentofu-state-123456789012-us-east-1
 TF_STATE_KEY=open-homelab/proxmox/production.tfstate
 ```
 
@@ -35,9 +35,9 @@ Deploy:
 ```bash
 cd infra/aws
 bun install
-AWS_TERRAFORM_STATE_ENABLED=1 bun run typecheck
-AWS_TERRAFORM_STATE_ENABLED=1 bun run synth
-AWS_TERRAFORM_STATE_ENABLED=1 bun run deploy open-homelab-terraform-state
+AWS_OPENTOFU_STATE_ENABLED=1 bun run typecheck
+AWS_OPENTOFU_STATE_ENABLED=1 bun run synth
+AWS_OPENTOFU_STATE_ENABLED=1 bun run deploy open-homelab-opentofu-state
 ```
 
 Migrate existing Proxmox state only after the bucket exists:
@@ -47,8 +47,8 @@ cd ../proxmox
 bun run synth
 cd cdktf.out/stacks/production
 set -a; . ../../../../../.env; set +a
-terraform init -migrate-state
-terraform plan
+tofu init -migrate-state
+tofu plan
 ```
 
 ## AWS DNS Automation
@@ -96,4 +96,4 @@ kubectl -n argocd get applications -o wide
 Check Route53 changes in AWS before assuming DNS propagation is complete.
 
 ## Safety Rules
-Never print AWS credentials, private keys, `.context/iam-roles-anywhere` key material, kubeconfigs, OpenBao root tokens, or Terraform state. If `PUBLIC_DOMAIN` or `PUBLIC_HOSTED_ZONE_ID` is still an example value, stop and ask the user to configure real AWS DNS values before deployment.
+Never print AWS credentials, private keys, `.context/iam-roles-anywhere` key material, kubeconfigs, OpenBao root tokens, or OpenTofu state. If `PUBLIC_DOMAIN` or `PUBLIC_HOSTED_ZONE_ID` is still an example value, stop and ask the user to configure real AWS DNS values before deployment.

@@ -15,7 +15,7 @@ Use this skill to guide a user from a fresh checkout to a working local/no-AWS `
 - `infra/proxmox/README.md`
 - `clusters/production/talos/README.md`
 
-Default mode uses local Terraform state, Proxmox-managed Talos VMs, MetalLB, Traefik, local DNS or `/etc/hosts`, and no Route53, ExternalDNS, or IAM Roles Anywhere.
+Default mode uses local OpenTofu state, Proxmox-managed Talos VMs, MetalLB, Traefik, local DNS or `/etc/hosts`, and no Route53, ExternalDNS, or IAM Roles Anywhere.
 
 ## Preflight
 
@@ -26,9 +26,9 @@ Before running commands, verify the user customized:
 - `clusters/production/talos/config.yaml`
 - platform hostnames under `platform/*/values.yaml`
 
-Required tools: `bun`, `terraform`, `kubectl`, `helm`, `talosctl`, `jq`, and `yq`.
+Required tools: `bun`, `tofu` (OpenTofu), `kubectl`, `helm`, `talosctl`, `jq`, and `yq`.
 
-Never print real values from `.env`, kubeconfigs, Talos secrets, OpenBao init files, private keys, or Terraform state.
+Never print real values from `.env`, kubeconfigs, Talos secrets, OpenBao init files, private keys, or OpenTofu state.
 
 ## Bring Up
 
