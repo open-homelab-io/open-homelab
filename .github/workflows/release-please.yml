@@ -18,5 +18,11 @@ jobs:
       - name: Create or publish release
         uses: googleapis/release-please-action@v4
         with:
+          # The default GITHUB_TOKEN cannot open pull requests when the org
+          # policy "Allow GitHub Actions to create and approve pull requests"
+          # is disabled. Use a dedicated token (fine-grained PAT or GitHub App
+          # token) with contents:write + pull-requests:write instead. PRs
+          # opened with this token also trigger other CI workflows.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
